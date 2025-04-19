@@ -1,0 +1,9 @@
+Metadata-Version: 2.1
+Name: corrpy
+Version: 0.1.0
+Summary: Correlation analysis tool with smart interpretation
+Home-page: https://github.com/Parthdsaiml/corrpy
+Author: YellowForest
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Description-Content-Type: text/markdown

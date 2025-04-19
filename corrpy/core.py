@@ -1,0 +1,455 @@
+# prompt: import needed libraries
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import math
+
+# Example usage (you can remove this if not needed)
+# print("Libraries imported successfully")
+pd.set_option('display.expand_frame_repr', False)
+
+
+class Nordinal:
+    def __init__(self):
+        pass
+
+    def sort_group_by_column(self, df, column):
+      df_sorted = df.sort_values(by = column)
+      return df_sorted
+
+    def group_bicolumn(self, df, column, target_column):
+      bi_df = df[[column, target_column]]
+      return bi_df
+
+    def encode_relative_column(self, df, column, relative_column):
+      value_dict = df[column].unique()
+      ordinal_map = {}
+      for i, value in enumerate(value_dict):
+        ordinal_map[value] = i
+      df[f"{column}_ordinal"] = df[column].map(ordinal_map)
+      df = df.reset_index(drop = True)
+      df = self.sort_group_by_column(df, relative_column)
+
+      return df
+
+
+    def check_sparsity(self, df, encoded_column, tolerance = 0.3):
+      index_dict = {}
+      df = df.reset_index(drop = True)
+      for value in df[encoded_column].unique():
+        index_dict[value] = list(df[df[encoded_column] == value].index)
+      total_gaps = 0
+      sparse_cases = 0
+
+      for value, indices in index_dict.items():
+        for i in range(1, len(indices)):
+          gap = indices[i] - indices[i - 1]
+          total_gaps += 1
+          if gap > 1:
+            sparse_cases += 1
+
+      if total_gaps == 0:
+        sparsity_rate = 0
+      else:
+        sparsity_rate = sparse_cases / total_gaps
+
+      return 1 - sparsity_rate
+
+
+    def is_ordinal(self, df, relative_column, target_column, tolerance = 0.3):
+      df = self.group_bicolumn(df, relative_column, target_column).copy()
+      df = self.encode_relative_column(df, target_column, relative_column)
+      df = self.sort_group_by_column(df, relative_column)
+
+      return self.check_sparsity(df, f"{target_column}_ordinal", tolerance)
+
+   
+    def getObjvsObj(self, df):
+      from scipy.stats import chi2_contingency
+      dfObj = df.select_dtypes(include=[object]).copy()
+      objVsObjDF = []
+      for featureA in dfObj.columns:
+        for featureB in dfObj.columns:
+          if (featureA != featureB):
+            contingency = pd.crosstab(df[featureA], df[featureB])
+            chi2, p, _, _ = chi2_contingency(contingency)
+            objVsObjDF.append([featureA, featureB, round(chi2, 2), round(p, 2)])
+      objVsObjDF = pd.DataFrame(objVsObjDF, columns = ["Feature A", "Feature B", "Chi2", "P-Value"])
+      return objVsObjDF
+
+
+class Corrpy:
+  def __init__(self):
+    pass
+
+  def getDict(self):
+    binsDict = {}
+
+    leftLimit = -1.0
+    rightLimit = -0.9
+
+    pointer = leftLimit
+
+    while (leftLimit <= 0.9):
+      binsDict[f"[{round(leftLimit, 1)}] <= x < [{round(rightLimit, 1)}]"] = []
+      leftLimit += 0.1
+      rightLimit += 0.1
+
+    return binsDict
+
+
+  def fillDict(self, df, toDF = False):
+    df = df.select_dtypes(include=[np.number])
+    binsDict = self.getDict()
+    for colA in df.columns:
+      for colb in df.columns:
+        if (colA != colb):
+          corrValue = df[colA].corr(df[colb])
+          self.catCorr(corrValue, colA, colb, binsDict)
+    self.filterDict(binsDict)
+    if (toDF):
+      return self.formatBinsDicts(binsDict, toDF)
+    return self.formatBinsDicts(binsDict)
+
+  def filterDict(self, binsDict):
+    # Create a list of keys to delete to avoid modifying the dictionary during iteration
+    keys_to_delete = [key for key in binsDict if not binsDict[key]]
+    # Delete the keys after the iteration
+    for key in keys_to_delete:
+        del binsDict[key]
+    return binsDict
+
+  def createBins(self, df):
+    df = df.select_dtypes(include=[np.number])
+    binsDict = self.getDict()
+    for colA in df.columns:
+      for colb in df.columns:
+        if (colA != colb):
+          corrValue = df[colA].corr(df[colb])
+          self.catCorr(corrValue, colA, colb, binsDict)
+    self.filterDict(binsDict)
+
+
+    noDuplicateDict = []
+    for key, value in binsDict.items():
+      noDuplicateDict = [
+          [item[0], item[1], round(float(item[2]), 2)] for item in value
+      ]
+
+      binsDict[key] = noDuplicateDict
+
+    seen = set()
+    uniqueDict = {}
+    for key, value in binsDict.items():
+      uniqueCorrs = []
+      for cola, colb, corr in value:
+        sortedKey = tuple(sorted([cola, colb]))
+        if (sortedKey not in seen):
+          seen.add(sortedKey)
+          uniqueCorrs.append([cola, colb, corr])
+      uniqueDict[key] = uniqueCorrs
+
+
+    return uniqueDict
+
+
+  def catCorr(self, corrValue, columnA, columnB, binsDict):
+    if (-1.0 <= corrValue < -0.9):
+        binsDict["[-1.0] <= x < [-0.9]"].append([columnA, columnB, corrValue])
+    elif (-0.9 <= corrValue < -0.8):
+        binsDict["[-0.9] <= x < [-0.8]"].append([columnA, columnB, corrValue])
+    elif (-0.8 <= corrValue < -0.7):
+        binsDict["[-0.8] <= x < [-0.7]"].append([columnA, columnB, corrValue])
+    elif (-0.7 <= corrValue < -0.6):
+        binsDict["[-0.7] <= x < [-0.6]"].append([columnA, columnB, corrValue])
+    elif (-0.6 <= corrValue < -0.5):
+        binsDict["[-0.6] <= x < [-0.5]"].append([columnA, columnB, corrValue])
+    elif (-0.5 <= corrValue < -0.4):
+        binsDict["[-0.5] <= x < [-0.4]"].append([columnA, columnB, corrValue])
+    elif (-0.4 <= corrValue < -0.3):
+        binsDict["[-0.4] <= x < [-0.3]"].append([columnA, columnB, corrValue])
+    elif (-0.3 <= corrValue < -0.2):
+        binsDict["[-0.3] <= x < [-0.2]"].append([columnA, columnB, corrValue])
+    elif (-0.2 <= corrValue < -0.1):
+        binsDict["[-0.2] <= x < [-0.1]"].append([columnA, columnB, corrValue])
+    elif (-0.1 <= corrValue < 0.0):
+        binsDict["[-0.1] <= x < [-0.0]"].append([columnA, columnB, corrValue])
+    elif (0.0 <= corrValue < 0.1):
+        binsDict["[-0.0] <= x < [0.1]"].append([columnA, columnB, corrValue])
+    elif (0.1 <= corrValue < 0.2):
+        binsDict["[0.1] <= x < [0.2]"].append([columnA, columnB, corrValue])
+    elif (0.2 <= corrValue < 0.3):
+        binsDict["[0.2] <= x < [0.3]"].append([columnA, columnB, corrValue])
+    elif (0.3 <= corrValue < 0.4):
+        binsDict["[0.3] <= x < [0.4]"].append([columnA, columnB, corrValue])
+    elif (0.4 <= corrValue < 0.5):
+        binsDict["[0.4] <= x < [0.5]"].append([columnA, columnB, corrValue])
+    elif (0.5 <= corrValue < 0.6):
+        binsDict["[0.5] <= x < [0.6]"].append([columnA, columnB, corrValue])
+    elif (0.6 <= corrValue < 0.7):
+        binsDict["[0.6] <= x < [0.7]"].append([columnA, columnB, corrValue])
+    elif (0.7 <= corrValue < 0.8):
+        binsDict["[0.7] <= x < [0.8]"].append([columnA, columnB, corrValue])
+    elif (0.8 <= corrValue < 0.9):
+        binsDict["[0.8] <= x < [0.9]"].append([columnA, columnB, corrValue])
+    elif (0.9 <= corrValue < 1.0):
+        binsDict["[0.9] <= x < [1.0]"].append([columnA, columnB, corrValue])
+    else:
+        pass
+
+    return binsDict
+
+  def formatBinsDicts(self, binsDict, toDF = False):
+    formattedDict = {}
+
+    for key, value in binsDict.items():
+      formattedDictValues = [
+          [item[0], item[1], round(float(item[2]), 2)] for item in value
+      ]
+      formattedDictValues = self.sortBinsDicts(formattedDictValues)
+      formattedDict[key] = formattedDictValues
+
+    seen = set()
+    uniqueCorrs = []
+
+    for strength, pairs in formattedDict.items():
+      for x, y, corr in pairs:
+        key = tuple(sorted([x, y]))
+
+        if (key not in seen):
+          seen.add(key)
+          uniqueCorrs.append((x, y, corr))
+    formattedDict = self.sortBinsDicts(uniqueCorrs)
+    if (toDF):
+      return pd.DataFrame(formattedDict, columns = ["Feature A", "Feature B", "Correlation"])
+    return formattedDict
+
+  def sortBinsDicts(self, binsValues):
+    def getCorrValue(item):
+      return item[2]
+    return sorted(binsValues, key = getCorrValue, reverse = True)
+
+
+  def prettyPrintBins(self, binsDict):
+    for binRange, pairs in binsDict.items():
+      print(f"\nBin Range : {binRange}")
+      for item in pairs:
+        f1 = item[0]
+        f2 = item[1]
+        val = item[2]
+        print(f" - {f1} ↔ {f2} : {val}")
+
+
+  def getValuesFromBin(self, binsDict):
+    corrList = []
+
+    for key in binsDict.keys():
+      corrlist = []
+      for item in binsDict[key]:
+        corrlist.append(item[2])
+      corrList.append(corrlist)
+
+    return corrList
+
+
+
+  def getVarianceInBin(self, array, threshold = 70):
+    start = 0
+    end = len(array) - 1
+    indexList = []
+    while (end >= 0):
+      if (self.getDifferPercentage(array[end], array[start]) >= threshold):
+        indexList.append([start, end, f"Value = {round(self.getDifferPercentage(array[end], array[start]))}"])
+        start += 1
+      else:
+        end -= 1
+        start = 0
+    return indexList
+
+
+
+
+
+
+  def getLabled(self, df):
+    scoreMatrix = self.fillDict(df, toDF = True)
+    bins = [0, 0.3, 0.8, float("inf")]
+    labels = ["Low", "Medium", "High"]
+    scoreMatrix["Strength"] = pd.cut(scoreMatrix["Correlation"], bins = bins, labels = labels)
+    return scoreMatrix
+
+
+  def generateInterpreations(self, df):
+    def generateInterpreationsForFeatureAB(featureA, featureB, correlation):
+      absCorr = abs(correlation)
+      direction = '↑' if correlation > 0 else '↓'
+      if (correlation > 0 and correlation < 0.7):
+        strengthSymbol = "↑"
+      elif (correlation < 0 and correlation > -0.7):
+        strengthSymbol = "↓"
+      elif (correlation > 0.7 and correlation < 0.9):
+        strengthSymbol = "↑↑"
+      elif (correlation > -0.9 and correlation < -0.7):
+        strengthSymbol = "↓↓"
+      elif (correlation > 0.9):
+        strengthSymbol = "↑↑↑"
+      elif (correlation < -0.9):
+        strengthSymbol = "↓↓↓"
+      else:
+        strengthSymbol = "-"
+
+      if (absCorr >= 0.8):
+        insight = f"{strengthSymbol} Strong: Direct Driver"
+      elif (0.6 <= absCorr < 0.8):
+        insight = f"{strengthSymbol} Key Factor but not only Driver"
+      elif (0.4 <= absCorr < 0.6):
+        insight = f"{direction} Moderate: Linked Trend"
+      elif (0.2 <= absCorr < 0.4):
+        insight = f"{direction} Weak: Contextual"
+      else:
+        insight = f"No linkage"
+      return insight
+
+    def generate(row):
+      featureA = row["Feature A"]
+      featureB = row["Feature B"]
+      corr = row["Correlation"]
+
+      return generateInterpreationsForFeatureAB(featureA, featureB, corr)
+    df["Interpretation"] = df.apply(generate, axis = 1)
+    self.addTrends(df)
+    return df
+
+  def addTrends(self, df):
+    def getTrends(corrValue):
+      absCorrValue = abs(corrValue)
+      barSegments = min(5, int(absCorrValue * 5))
+      return '▰' * barSegments + '▱' * (5 - barSegments)
+
+    df["Trend"] = df["Correlation"].apply(getTrends)
+    return df
+
+  def getNumFeatures(self, df):
+    dfNum = df.select_dtypes(include=[np.number])
+    return dfNum
+
+  def getCorrObjDtype(self, df):
+    dfObj = df.select_dtypes(include=[object]).copy()
+    dfNum = df.select_dtypes(include=[np.number]).copy()
+
+    nordinal = Nordinal()
+    objNumCorr = {}
+    for colA in dfObj.columns:
+      for colB in dfNum.columns:
+        featureA = colA
+        featureB = colB
+        corrValue = nordinal.is_ordinal(df, featureB, featureA)
+        objNumCorr[(featureA, featureB)] = round(corrValue, 2)
+    data = [(a, b, corr) for (a, b), corr in objNumCorr.items()]
+    print(f"Feature A -> Object Column")
+    print(f"Feature B -> Numerical Column")
+    objCorrNum = pd.DataFrame(data, columns = ["Feature A", "Feature B", "Correlation"])
+    objCorrNum = objCorrNum.sort_values(by='Correlation', ascending=False)
+    objCorrNum = self.generateInterpreations(objCorrNum)
+    objCorrNum = self.addTrends(objCorrNum)
+    return objCorrNum
+
+
+  def getTotalCorrRelation(self, df, short = False):
+    from IPython.display import display, HTML
+
+    display(HTML("<h3 style='color: teal;'>🔢 Numerical vs Numerical Relation</h3>"))
+    dfNum = self.generateInterpreations(self.getLabled(self.getNumFeatures(df).copy()))
+    if (short):
+      print(dfNum.head())
+    else:
+      print(dfNum)
+
+    display(HTML("<h3 style='color: purple;'>🧠 Object vs Numerical Relation</h3>"))
+    dfObj = self.getCorrObjDtype(df)
+    if (short):
+      print(dfObj.head())
+    else:
+      print(dfObj)
+
+    nordinal = Nordinal()
+    objVsObjScore = nordinal.getObjvsObj(df)
+    # sort on basis of Chi2 column
+    objVsObjScore = objVsObjScore.sort_values(by='Chi2', ascending=False)
+    display(HTML("<h3 style='color: green;'>📊 Object vs Object Relation</h3>"))
+    objVsObjScore = objVsObjScore.drop(objVsObjScore.index[1::2])
+    if (short):
+      print(objVsObjScore.head())
+    else:
+      print(objVsObjScore)
+
+    display(HTML("<h3 style='color: crimson;'>⚠️ Transitive Relation Alert</h3>"))
+    transitDF = pd.DataFrame(self.getTransitRelations(df), columns = ["Feature A", "Feature B", "Feature C"])
+    if (short):
+      print(transitDF.head())
+    else:
+      print(transitDF)
+
+  # def ovoInterpretations(self, df):
+
+
+  def getMatrixByKey(self, bins, key):
+    return bins[key]
+
+  def findTransitInMatrix(self, matrix):
+    counter = 0
+    transitList = []
+    for row in matrix:
+      item = row[0]
+      transitList.append(self.findInMatrix(matrix, item, counter, 0))
+      item = row[1]
+      transitList.append(self.findInMatrix(matrix, item, counter, 1))
+      counter += 1
+    return transitList
+  def findInMatrix(self, matrix, item, rowId, current):
+    itemList = []
+    for i in range(0, len(matrix)):
+      if (i != rowId):
+        if (matrix[i][0] == item):
+          if (current == 0):
+            itemList.append((matrix[i][1], item, matrix[rowId][1]))
+          else:
+            itemList.append((item, matrix[i][0], matrix[rowId][0]))
+        elif (matrix[i][1] == item):
+          if (current == 1):
+            itemList.append((matrix[i][0], item, matrix[rowId][0]))
+          else:
+            itemList.append((item, matrix[i][1], matrix[rowId][1]))
+
+    return itemList
+
+  def findTransit(self, bins):
+    transitRelations = []
+    for key in bins.keys():
+      transitRelations.extend(self.findTransitInMatrix(self.getMatrixByKey(bins, key)))  # Extend instead of append
+    return transitRelations
+
+  def getTransitRelations(self, df):
+
+    transitList = self.findTransit(self.createBins(df))
+    # Convert nested lists to tuples before adding to the set
+    # Additionally, sort inner tuples to treat relations as equal regardless of order
+    unique_relations = set()
+    for outer in transitList:
+      for sub in outer:  # Removed extra layer
+        if sub:
+          unique_relations.add(tuple(sorted(sub)))  # Sort inner tuples before adding
+
+
+    listOfSet = list(unique_relations)
+
+    for row in listOfSet[:]:
+      if (row[0] == row[1] or row[1] == row[2] or row[0] == row[2]):
+        listOfSet.remove(row)
+    return listOfSet
+
+
+
+
