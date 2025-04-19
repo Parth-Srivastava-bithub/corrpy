@@ -1,1 +1,2 @@
-"# corrpy" 
+# CorrPY - Correlation with Ease
+
