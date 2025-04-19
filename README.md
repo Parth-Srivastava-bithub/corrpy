@@ -1,5 +1,10 @@
 # CorrPY - Correlation with Ease
 
+![PyPI version](https://img.shields.io/pypi/v/corrpy)
+![PyPI Downloads](https://img.shields.io/pypi/dm/corrpy)
+![License](https://img.shields.io/badge/license-BSD%203--Clause-blue)
+![Powered by NumFOCUS](https://img.shields.io/badge/powered%20by-NumFOCUS-blue)
+
 ## How to install this library
 
 ```cmd
