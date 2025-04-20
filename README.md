@@ -54,7 +54,8 @@ corrpy.getTotalCorrRelation(df)
 
 ## 📈 Example Output
 
-![Corrpy Demo](image.png)
+![image](https://github.com/user-attachments/assets/2fa9140e-5ae1-4f18-a030-0dcb74e44ea9)
+
 
 ---
 
