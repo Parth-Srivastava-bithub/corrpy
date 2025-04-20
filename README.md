@@ -71,7 +71,6 @@ corrpy.getTotalCorrRelation(df)
 - pandas  
 - numpy  
 - scipy  
-- matplotlib  
 - seaborn  
 - IPython  
 
