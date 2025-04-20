@@ -79,7 +79,6 @@ class Nordinal:
       objVsObjDF = pd.DataFrame(objVsObjDF, columns = ["Feature A", "Feature B", "Chi2", "P-Value"])
       return objVsObjDF
 
-
 class Corrpy:
   def __init__(self):
     pass
@@ -232,16 +231,6 @@ class Corrpy:
     return sorted(binsValues, key = getCorrValue, reverse = True)
 
 
-  def prettyPrintBins(self, binsDict):
-    for binRange, pairs in binsDict.items():
-      print(f"\nBin Range : {binRange}")
-      for item in pairs:
-        f1 = item[0]
-        f2 = item[1]
-        val = item[2]
-        print(f" - {f1} ↔ {f2} : {val}")
-
-
   def getValuesFromBin(self, binsDict):
     corrList = []
 
@@ -348,8 +337,7 @@ class Corrpy:
         corrValue = nordinal.is_ordinal(df, featureB, featureA)
         objNumCorr[(featureA, featureB)] = round(corrValue, 2)
     data = [(a, b, corr) for (a, b), corr in objNumCorr.items()]
-    print(f"Feature A -> Object Column")
-    print(f"Feature B -> Numerical Column")
+
     objCorrNum = pd.DataFrame(data, columns = ["Feature A", "Feature B", "Correlation"])
     objCorrNum = objCorrNum.sort_values(by='Correlation', ascending=False)
     objCorrNum = self.generateInterpreations(objCorrNum)
@@ -369,10 +357,13 @@ class Corrpy:
 
     display(HTML("<h3 style='color: purple;'>🧠 Object vs Numerical Relation</h3>"))
     dfObj = self.getCorrObjDtype(df)
+    dfObj = dfObj.rename(columns = {"Feature A": "Object Column", "Feature B": "Numerical Column"})
     if (short):
       print(dfObj.head())
     else:
       print(dfObj)
+    
+    display(HTML("<p style='color: red;'>These correlations show there's some link, but not whether it's positive or negative. Just a heads-up, not a verdict</p>"))
 
     nordinal = Nordinal()
     objVsObjScore = nordinal.getObjvsObj(df)
@@ -385,6 +376,22 @@ class Corrpy:
     else:
       print(objVsObjScore)
 
+    display(HTML("<h3 style='color: lightblue;'>⌚ Time vs Numerical Relation</h3>"))
+    dfTime = self.getTimeNumCorr(df)
+    dfTime = dfTime.rename(columns = {"Feature A": "DateTime Column", "Feature B": "Numerical Column", "Correlation": "Correlation Score"})
+    if (short):
+      print(dfTime.head())
+    else:
+      print(dfTime)
+
+    display(HTML("<h3 style='color: orange;'>⌚ Time vs Object Relation</h3>"))
+    dfTimeObj = self.getTimeObjCorr(df)
+    dfTimeObj = dfTimeObj.rename(columns = {"Feature A": "DateTime Column", "Feature B": "Object Column", "Correlation": "Correlation Score"})
+    if (short):
+      print(dfTimeObj.head())
+    else:
+      print(dfTimeObj)
+
     display(HTML("<h3 style='color: crimson;'>⚠️ Transitive Relation Alert</h3>"))
     transitDF = pd.DataFrame(self.getTransitRelations(df), columns = ["Feature A", "Feature B", "Feature C"])
     if (short):
@@ -392,7 +399,8 @@ class Corrpy:
     else:
       print(transitDF)
 
-  # def ovoInterpretations(self, df):
+
+
 
 
   def getMatrixByKey(self, bins, key):
@@ -449,6 +457,50 @@ class Corrpy:
       if (row[0] == row[1] or row[1] == row[2] or row[0] == row[2]):
         listOfSet.remove(row)
     return listOfSet
+
+
+  def getTimeNumCorr(self, df):
+    df = df.copy()
+    dfNum = df.select_dtypes(include = [np.number])
+    # time series data
+    dfTime = df.select_dtypes(include=['datetime64'])
+    corrs = []
+    for t_col in dfTime.columns:
+      for n_col in dfNum.columns:
+        corrs.append((t_col, n_col, dfTime[t_col].corr(dfNum[n_col])))
+    corrsDf = pd.DataFrame(corrs, columns=["Feature A", "Feature B", "Correlation"])
+    corrsDf = corrsDf.sort_values(by='Correlation', ascending=False)
+    corrDf = self.generateInterpreations(corrsDf)
+    corrDf = self.addTrends(corrDf)
+    return corrsDf
+
+  def getTimeObjCorr(self, df):
+    df = df.copy()
+    dfTime = df.select_dtypes(include=['datetime64'])
+    dfObj = df.select_dtypes(include=[object])
+    corrs = []
+
+    for col in dfTime.columns:
+      dfTime[col] = dfTime[col].astype('int64')
+
+    for col in dfObj.columns:
+      dfObj[col] = pd.Categorical(dfObj[col]).codes
+
+    for t_col in dfTime.columns:
+      for o_col in dfObj.columns:
+        corrs.append((t_col, o_col, dfTime[t_col].corr(dfObj[o_col])))
+
+    corrDf = pd.DataFrame(corrs, columns=["Feature A", "Feature B", "Correlation"])
+    corrDf = corrDf.sort_values(by='Correlation', ascending=False)
+    corrDf = self.generateInterpreations(corrDf)
+    corrDf = self.addTrends(corrDf)
+    return corrDf
+
+
+
+
+
+
 
 
 

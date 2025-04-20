@@ -1,9 +1,52 @@
 Metadata-Version: 2.1
-Name: corrpy
-Version: 0.1.0
+Name: Corrpy
+Version: 0.1.3
 Summary: Correlation analysis tool with smart interpretation
 Home-page: https://github.com/Parthdsaiml/corrpy
 Author: YellowForest
+License: BSD 3-Clause
 Classifier: Programming Language :: Python :: 3
-Classifier: License :: OSI Approved :: MIT License
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Operating System :: OS Independent
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: Topic :: Scientific/Engineering :: Mathematics
 Description-Content-Type: text/markdown
+
+# CorrPY - Correlation with Ease
+
+## How to install this library
+
+```cmd
+pip install corrpy
+```
+
+## Basic Commands
+
+1. Initialization
+
+```python
+from corrpy import Corrpy
+```
+
+This line imports the main class `Corrpy` which contains the main correlation calculation functionality
+
+2. Using Instance
+
+```python
+corrpy = Corrpy()
+```
+
+This creates an instance of the `Corrpy` class which can then be used to perform all the correlation calculations
+
+3. Getting Overview
+
+```python
+corrpy.getTotalCorrRelation(df)
+```
+
+This will return a dataframe that contains the correlation between each column in the dataframe. For now, Corrpy only supports pandas DataFrames
+
+### Demo Result
+
+![alt text](image.png)

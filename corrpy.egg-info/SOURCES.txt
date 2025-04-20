@@ -1,9 +1,9 @@
 README.md
 setup.py
+Corrpy.egg-info/PKG-INFO
+Corrpy.egg-info/SOURCES.txt
+Corrpy.egg-info/dependency_links.txt
+Corrpy.egg-info/requires.txt
+Corrpy.egg-info/top_level.txt
 corrpy/__init__.py
 corrpy/core.py
-corrpy.egg-info/PKG-INFO
-corrpy.egg-info/SOURCES.txt
-corrpy.egg-info/dependency_links.txt
-corrpy.egg-info/requires.txt
-corrpy.egg-info/top_level.txt

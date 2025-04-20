@@ -1,1 +1,1 @@
-from .core import Corrpy, Nordinal
+from .core import Corrpy
