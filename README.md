@@ -35,6 +35,12 @@ This creates an instance of the `Corrpy` class which can then be used to perform
 corrpy.getTotalCorrRelation(df)
 ```
 
+4. Compact Version
+   You can use short = True to get only top result
+   ```python
+   corrpy.getTotalCorrRelation(df, short = True)
+   ```
+
 This will return a dataframe that contains the correlation between each column in the dataframe. For now, Corrpy only supports pandas DataFrames
 
 ### Demo Result
