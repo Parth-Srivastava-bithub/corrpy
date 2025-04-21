@@ -5,9 +5,7 @@
 ![License](https://img.shields.io/badge/license-BSD%203--Clause-blue)
 ![Powered by NumFOCUS](https://img.shields.io/badge/powered%20by-NumFOCUS-blue)
 
-Here’s a clean and attractive `README.md` for your **CorrPY** project on GitHub:
 
----
 
 
 
@@ -143,7 +141,6 @@ The correlation and relationships presented in this analysis help you understand
 - pandas  
 - numpy  
 - scipy  
-- matplotlib  
 - seaborn  
 - IPython  
 
