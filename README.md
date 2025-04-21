@@ -43,6 +43,9 @@ corrpy.getTotalCorrRelation(df)
 
 ---
 
+
+
+
 ## 🧩 Features
 
 - 📊 **Numerical vs Numerical** → Pearson correlation with strength interpretation  
@@ -59,6 +62,73 @@ corrpy.getTotalCorrRelation(df)
 
 
 ---
+
+# Explanation of Terms in Correlation Analysis
+
+This document explains the key terms and terminology used in the correlation analysis output. Understanding these terms will help you interpret the relationship between various features in the dataset.
+
+---
+
+## Numerical vs Numerical Relation
+- **Feature A / Feature B**: These represent two numerical columns in the dataset that are being compared for correlation.
+- **Correlation Strength**: The value indicates how strongly two numerical features are related. Ranges from -1 to 1:
+  - **Positive values** (closer to 1) indicate a strong positive relationship.
+  - **Negative values** (closer to -1) indicate a strong negative relationship.
+  - **Low/No linkage** indicates little to no correlation.
+- **Interpretation**: A brief statement explaining the strength and nature of the correlation.
+- **Trend**: A graphical representation of the correlation trend, with symbols:
+  - ▱▱▱▱▱ = No significant trend
+
+---
+
+## Object vs Numerical Relation
+- **Object Column**: A categorical or non-numeric feature (e.g., string, category).
+- **Numerical Column**: A numerical feature (e.g., integer, float).
+- **Correlation**: The degree of association between an object feature and a numerical feature. It ranges from -1 to 1:
+  - **↑** indicates a positive correlation.
+  - **↓** indicates a negative correlation.
+- **Interpretation**: The explanation of the relationship:
+  - **Weak: Contextual** means a weak, context-dependent correlation.
+  - **Moderate: Linked Trend** means a moderate correlation showing a clear relationship.
+- **Trend**: The visual representation of the correlation trend:
+  - ▰▰▱▱▱ = Positive trend with moderate strength.
+
+---
+
+## Object vs Object Relation
+- **Feature A / Feature B**: Both are categorical (non-numerical) features.
+- **Chi2**: The Chi-square statistic measures the difference between expected and observed frequencies of categorical data.
+- **P-Value**: The probability of obtaining a result as extreme as the one observed, assuming the null hypothesis is true. A high p-value (> 0.05) typically means there's no significant relationship between the features.
+
+---
+
+## Time vs Numerical Relation
+- **DateTime Column**: A feature representing time or dates.
+- **Numerical Column**: A numerical feature being compared with the datetime column.
+- **Correlation Score**: The strength of the relationship between time and numerical features. A negative score indicates no linkage.
+- **Interpretation**: The relationship between time and numerical features, with **No linkage** indicating no significant correlation.
+- **Trend**: The trend representation:
+  - ▱▱▱▱▱ = No significant trend.
+
+---
+
+## Time vs Object Relation
+- **DateTime Column**: A feature representing time or dates.
+- **Object Column**: A categorical feature.
+- **Correlation Score**: Indicates the relationship between time and categorical features.
+- **Interpretation**: Explains the nature of the correlation, such as **Weak: Contextual** for weak, context-dependent correlation or **No linkage** for no significant correlation.
+- **Trend**: Visual representation of the correlation trend, with arrows indicating the strength and direction.
+
+---
+
+## Transitive Relation Alert
+- **Feature A / Feature B / Feature C**: A scenario where the correlation between Feature A and Feature B might be influenced by Feature C. This suggests a transitive relationship where indirect connections between features need to be checked.
+
+---
+
+### Conclusion
+The correlation and relationships presented in this analysis help you understand how different features in your dataset are connected. Correlations can vary from weak to strong, positive or negative, and these trends provide valuable insights into how to approach data analysis and modeling.
+
 
 ## 💡 Why CorrPY?
 

@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name = "Corrpy  ",
+    name = "Corrpy",
     version = "0.1.3",
     packages = find_packages(),
     install_requires = [
@@ -9,7 +9,7 @@ setup(
     ],
     author = 'YellowForest',
     description='Correlation analysis tool with smart interpretation',
-    long_description=open('README.md').read(),
+    long_description=open('README.md', encoding='utf-8').read(),
     long_description_content_type='text/markdown',
     url='https://github.com/Parthdsaiml/corrpy',  # optional
     license='BSD 3-Clause',  # Use BSD license here if that's the correct one

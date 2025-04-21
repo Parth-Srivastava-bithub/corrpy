@@ -496,6 +496,40 @@ class Corrpy:
     corrDf = self.addTrends(corrDf)
     return corrDf
 
+  def explainTerms(self):
+    """
+    🔍 Crack the code behind relation analysis – fast & fun style.
+    """
+    return {
+        "🔢 Numerical vs Numerical": {
+            "Correlation Strength": "How close two number columns dance together (-1 to 1).",
+            "Interpretation": "⬆️⬇️ Means strong or weak moves – direct or inverse.",
+            "Trend": "▰ bars show vibe strength. More ▰ = deeper link."
+        },
+        "🧠 Object vs Numerical": {
+            "Object Column": "Categories like 'city', 'gender', etc.",
+            "Numerical Column": "Numbers like 'salary', 'score'.",
+            "Correlation": "How much the category is steering the number ship.",
+            "Interpretation": "↑↑↑ = strong driver, ▱▱▱ = nothing to see."
+        },
+        "📊 Object vs Object": {
+            "Chi2": "Stat hammer – checks if categories are secretly tied.",
+            "P-Value": "Truth serum – low = real bond, high = just coincidence."
+        },
+        "⌚ Time vs Numerical": {
+            "Correlation Score": "How the numbers change over time.",
+            "Interpretation": "↑ = time’s driving the data, ↓ = time wrecks it.",
+            "Trend": "▰▱ = the timeline’s vibe strength."
+        },
+        "⌚ Time vs Object": {
+            "Correlation Score": "Are categories changing with time?",
+            "Interpretation": "Strong = evolution, Weak = static."
+        },
+        "⚠️ Transitive Relation Alert": {
+            "Feature A, B, C": "A → B and B → C? Yo, A might be messin’ with C too 👀."
+        }
+    }
+
 
 
 
