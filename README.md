@@ -174,6 +174,7 @@ The correlation and relationships presented in this analysis help you understand
 - scipy  
 - seaborn  
 - IPython  
+- together
 
 ---
 
