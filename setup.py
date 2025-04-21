@@ -2,10 +2,10 @@ from setuptools import setup, find_packages
 
 setup(
     name = "Corrpy",
-    version = "0.1.4",
+    version = "0.1.6",
     packages = find_packages(),
     install_requires = [
-        'pandas', 'numpy', 'scipy', 'matplotlib', 'seaborn', 'IPython'
+        'pandas', 'numpy', 'scipy', 'matplotlib', 'seaborn', 'IPython', 'together'
     ],
     author = 'YellowForest',
     description='Correlation analysis tool with smart interpretation',

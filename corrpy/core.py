@@ -526,9 +526,123 @@ class Corrpy:
                 # Print the DataFrame for each category (separate DataFrames for each)
                 print(f"Correlation between {objCol} and {numCol}:")
                 print(temp_df)
+  def explain(self, func_name):
+    docs = {
+        "getTotalCorrRelation": (
+            "🔍 **getTotalCorrRelation** runs full-scale correlation analysis on all column types:\n"
+            "• 🔢 Numerical vs Numerical\n"
+            "• 🧠 Object vs Numerical\n"
+            "• 🕒 Time-based patterns\n"
+            "• ⚠️ Transitive (indirect) relations\n\n"
+            "Output includes: Correlation Score, Strength, Interpretation & Trend bar.\n"
+            "📘 Terms explained here → https://github.com/Parthdsaiml/corrpy?tab=readme-ov-file#explanation-of-terms-in-correlation-analysis"
+        ),
 
+        "getGroupInf": (
+            "🧠 **getGroupInf(obj_col, num_col, df)** shows how each category inside `obj_col` affects `num_col` individually.\n"
+            "Use it to break down correlations category-wise.\n\n"
+            "📊 Example:\n"
+            "Correlation between obj_col1 and num_col1:\n"
+            "  Category  Correlation  Trend\n"
+            "0        C     0.05       ▱▱▱▱▱\n"
+            "1        B     0.01       ▱▱▱▱▱\n"
+            "2        A    -0.06       ▱▱▱▱▱\n"
+            "📘 Terms explained here → https://github.com/Parthdsaiml/corrpy?tab=readme-ov-file#get-to-know-how-each-cateogry-effect-correlation-with-other-numeric-values"
+
+        ),
+
+        "getAllGroupInf": (
+            "📊 **getAllGroupInf(df)** auto-applies `getGroupInf` on all combinations of object ↔ numeric columns.\n"
+            "Useful when you don’t want to check each manually.\n"
+            "Returns grouped correlations for every pair like:\n"
+            "• obj_col1 vs num_col1, num_col2, etc.\n"
+            "• obj_col2 vs num_col1, num_col2, etc. \n"
+            "Please Enter 'getGroupInf' also to get detail explanation\n"
+            "📘 Terms explained here → https://github.com/Parthdsaiml/corrpy?tab=readme-ov-file#get-to-know-how-each-cateogry-effect-correlation-with-other-numeric-values"
+        )
+    }
+
+    print(docs.get(func_name, "❓ No explanation found for this method."))
+
+
+  def setApi(self):
+    import os
+
+    # Check if API token is saved already
+    if os.path.exists("api_token.txt"):
+        with open("api_token.txt", "r") as file:
+            apiToken = file.read().strip()
+        print("API Token loaded from file.")
+        return apiToken
+
+    print("Do You Have API Token (y/n)?")
+    flag = input()
+
+    if (flag.lower() == "y"):
+        apiToken = input("Please paste your API token here: ")
+        with open("api_token.txt", "w") as file:
+            file.write(apiToken)
+        print("API Token saved for future use.")
+    else:
+        print("Go to https://www.together.ai/ and generate your token. IT'S FREE!!")
+        print("Then paste it here:")
+        apiToken = input()  # Get the API token from the user
+        with open("api_token.txt", "w") as file:
+            file.write(apiToken)
+        print("API Token saved for future use.")
+
+    return apiToken
+
+  def explainAITC(self, df):
+    nvn = self.getLabled(self.getNumFeatures(df))
+    nvo = self.getCorrObjDtype(df)
+    nordinal = Nordinal()
+    ovo = nordinal.getObjvsObj(df)
+    transit = self.getTransitRelations(df)
+    
+    apiToken = self.setApi()  # Get the API token
+
+    from together import Together
+    msg = f"""
+    🧠 You are a skilled data analyst ai agent.
+    Use the correlation summary below and return an insightful, business-friendly explanation in simple words, ideal for non-technical stakeholders.
+
+    🧾 Here’s the insight summary:
+
+    📊 Numeric vs Numeric: {nvn}
+
+    🔢➡️🔤 Numeric vs Object: {nvo}
+
+    🔤 vs 🔤 Object vs Object: {ovo}
+
+    🔁 Transitive Relations: {transit}
+
+    🎯 Your task:
+
+    Break it down like you're explaining to a curious manager.
+
+    Use Markdown, large paragraphs, bullet points, and emojis.
+    Use Story Telling way of explaining reports. 
+    Keep it under 500 words.
+
+    Make it friendly, clear, and actionable.
+
+    Add a short “So what does this mean for us?” section at the end.
+    
+    """
+
+    client = Together(api_key=apiToken)  # Use the token here
+
+    response = client.chat.completions.create(
+        model="meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
+        messages=[{"role": "user", "content": msg}]
+    )
+
+    ai_output = response.choices[0].message.content
+    print(ai_output)
 
   
+
 
 
 

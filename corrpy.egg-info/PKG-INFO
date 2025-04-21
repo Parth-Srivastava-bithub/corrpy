@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: Corrpy
-Version: 0.1.4
+Version: 0.1.6
 Summary: Correlation analysis tool with smart interpretation
 Home-page: https://github.com/Parthdsaiml/corrpy
 Author: YellowForest
@@ -57,6 +57,26 @@ corrpy.getTotalCorrRelation(df)
 ---
 
 
+## Get to know how each cateogry effect Correlation with other numeric values
+
+```python
+corrpy.getGroupInf(objColumn, numColumn, df)
+```
+
+or 
+
+```python
+corrpy.getAllGroupInf(df)
+```
+
+
+`getGroupInf` function takes an object column, a numeric column, and a DataFrame as inputs. It will compute the correlation between the given object column and the given numeric column.
+
+`getAllGroupInf` function takes a DataFrame as an input. It will compute the correlation between all object columns and all numeric columns.
+
+![alt text](image-1.png)
+
+
 
 
 ## 🧩 Features
@@ -91,6 +111,8 @@ This document explains the key terms and terminology used in the correlation ana
 - **Interpretation**: A brief statement explaining the strength and nature of the correlation.
 - **Trend**: A graphical representation of the correlation trend, with symbols:
   - ▱▱▱▱▱ = No significant trend
+  - ▰▰▱▱▱ = Positive trend with moderate strength.
+    
 
 ---
 
@@ -104,7 +126,7 @@ This document explains the key terms and terminology used in the correlation ana
   - **Weak: Contextual** means a weak, context-dependent correlation.
   - **Moderate: Linked Trend** means a moderate correlation showing a clear relationship.
 - **Trend**: The visual representation of the correlation trend:
-  - ▰▰▱▱▱ = Positive trend with moderate strength.
+  - ▰▰▱▱▱ =  Trend with moderate strength *For Object Vs Numerical Relation Trends just shows the strength without any direction*.
 
 ---
 

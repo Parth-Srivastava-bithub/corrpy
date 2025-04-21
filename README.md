@@ -60,9 +60,18 @@ corrpy.getAllGroupInf(df)
 `getAllGroupInf` function takes a DataFrame as an input. It will compute the correlation between all object columns and all numeric columns.
 
 ![alt text](image-1.png)
+---
 
+## Get AI Insights
 
+```python
+corrpy.explainAITC(df)
+```
+`explainAITC` function takes a DataFrame as an input. It will compute the correlation between all object columns and all numeric columns. The correlation includes the strength of correlation, trend of the correlation, and the type of correlation (positive or negative). If the correlation is not significant, it will return a message indicating that there is no significant correlation.
 
+---
+
+![alt text](image-2.png)
 
 ## 🧩 Features
 
