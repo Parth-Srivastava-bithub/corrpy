@@ -59,6 +59,7 @@ corrpy.getAllGroupInf(df)
 
 `getAllGroupInf` function takes a DataFrame as an input. It will compute the correlation between all object columns and all numeric columns.
 
+![alt text](image-1.png)
 
 
 
