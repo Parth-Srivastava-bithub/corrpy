@@ -95,6 +95,8 @@ This document explains the key terms and terminology used in the correlation ana
 - **Interpretation**: A brief statement explaining the strength and nature of the correlation.
 - **Trend**: A graphical representation of the correlation trend, with symbols:
   - ▱▱▱▱▱ = No significant trend
+  - ▰▰▱▱▱ = Positive trend with moderate strength.
+    
 
 ---
 
@@ -108,7 +110,7 @@ This document explains the key terms and terminology used in the correlation ana
   - **Weak: Contextual** means a weak, context-dependent correlation.
   - **Moderate: Linked Trend** means a moderate correlation showing a clear relationship.
 - **Trend**: The visual representation of the correlation trend:
-  - ▰▰▱▱▱ = Positive trend with moderate strength.
+  - ▰▰▱▱▱ =  Trend with moderate strength *For Object Vs Numerical Relation Trends just shows the strength without any direction*.
 
 ---
 
