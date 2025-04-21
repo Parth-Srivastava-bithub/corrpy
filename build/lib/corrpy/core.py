@@ -495,40 +495,40 @@ class Corrpy:
     corrDf = self.generateInterpreations(corrDf)
     corrDf = self.addTrends(corrDf)
     return corrDf
+  def getGroupInf(self, objColumn, numColumn, df):
+    dummies = pd.get_dummies(df[objColumn])
+    df = pd.concat([df, dummies], axis = 1)
+    dfDummies = pd.concat([dummies, df[numColumn]], axis=1)
+    correlations = dfDummies.corr()[numColumn].drop(numColumn)
 
-  def explainTerms(self):
-    """
-    🔍 Crack the code behind relation analysis – fast & fun style.
-    """
-    return {
-        "🔢 Numerical vs Numerical": {
-            "Correlation Strength": "How close two number columns dance together (-1 to 1).",
-            "Interpretation": "⬆️⬇️ Means strong or weak moves – direct or inverse.",
-            "Trend": "▰ bars show vibe strength. More ▰ = deeper link."
-        },
-        "🧠 Object vs Numerical": {
-            "Object Column": "Categories like 'city', 'gender', etc.",
-            "Numerical Column": "Numbers like 'salary', 'score'.",
-            "Correlation": "How much the category is steering the number ship.",
-            "Interpretation": "↑↑↑ = strong driver, ▱▱▱ = nothing to see."
-        },
-        "📊 Object vs Object": {
-            "Chi2": "Stat hammer – checks if categories are secretly tied.",
-            "P-Value": "Truth serum – low = real bond, high = just coincidence."
-        },
-        "⌚ Time vs Numerical": {
-            "Correlation Score": "How the numbers change over time.",
-            "Interpretation": "↑ = time’s driving the data, ↓ = time wrecks it.",
-            "Trend": "▰▱ = the timeline’s vibe strength."
-        },
-        "⌚ Time vs Object": {
-            "Correlation Score": "Are categories changing with time?",
-            "Interpretation": "Strong = evolution, Weak = static."
-        },
-        "⚠️ Transitive Relation Alert": {
-            "Feature A, B, C": "A → B and B → C? Yo, A might be messin’ with C too 👀."
-        }
-    }
+    return correlations
+  
+  def getAllGroupInf(self, df):
+        df = df.copy()
+        
+        # Separate the object and numerical columns
+        dfObj = df.select_dtypes(include=[object])
+        dfNum = df.select_dtypes(include=[np.number])
+
+        # Loop through all object and numerical columns and get correlation
+        for objCol in dfObj.columns:
+            for numCol in dfNum.columns:
+                # Get the correlation values
+                dfGroup = self.getGroupInf(objCol, numCol, df)
+                
+                # Convert the correlation series to a DataFrame with 'category' and 'score' columns
+                temp_df = pd.DataFrame(dfGroup).reset_index()
+                temp_df.columns = ['Category', 'Correlation']  # Rename the columns
+                temp_df = temp_df.sort_values(by =  "Correlation", ascending=False)
+                temp_df = self.addTrends(temp_df)
+                temp_df = temp_df.reset_index(drop=True)
+
+                # Print the DataFrame for each category (separate DataFrames for each)
+                print(f"Correlation between {objCol} and {numCol}:")
+                print(temp_df)
+
+
+  
 
 
 

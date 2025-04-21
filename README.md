@@ -42,6 +42,25 @@ corrpy.getTotalCorrRelation(df)
 ---
 
 
+## Get to know how each cateogry effect Correlation with other numeric values
+
+```python
+corrpy.getGroupInf(objColumn, numColumn, df)
+```
+
+or 
+
+```python
+corrpy.getAllGroupInf(df)
+```
+
+
+`getGroupInf` function takes an object column, a numeric column, and a DataFrame as inputs. It will compute the correlation between the given object column and the given numeric column.
+
+`getAllGroupInf` function takes a DataFrame as an input. It will compute the correlation between all object columns and all numeric columns.
+
+
+
 
 
 ## 🧩 Features

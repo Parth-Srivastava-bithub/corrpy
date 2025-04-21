@@ -495,6 +495,38 @@ class Corrpy:
     corrDf = self.generateInterpreations(corrDf)
     corrDf = self.addTrends(corrDf)
     return corrDf
+  def getGroupInf(self, objColumn, numColumn, df):
+    dummies = pd.get_dummies(df[objColumn])
+    df = pd.concat([df, dummies], axis = 1)
+    dfDummies = pd.concat([dummies, df[numColumn]], axis=1)
+    correlations = dfDummies.corr()[numColumn].drop(numColumn)
+
+    return correlations
+  
+  def getAllGroupInf(self, df):
+        df = df.copy()
+        
+        # Separate the object and numerical columns
+        dfObj = df.select_dtypes(include=[object])
+        dfNum = df.select_dtypes(include=[np.number])
+
+        # Loop through all object and numerical columns and get correlation
+        for objCol in dfObj.columns:
+            for numCol in dfNum.columns:
+                # Get the correlation values
+                dfGroup = self.getGroupInf(objCol, numCol, df)
+                
+                # Convert the correlation series to a DataFrame with 'category' and 'score' columns
+                temp_df = pd.DataFrame(dfGroup).reset_index()
+                temp_df.columns = ['Category', 'Correlation']  # Rename the columns
+                temp_df = temp_df.sort_values(by =  "Correlation", ascending=False)
+                temp_df = self.addTrends(temp_df)
+                temp_df = temp_df.reset_index(drop=True)
+
+                # Print the DataFrame for each category (separate DataFrames for each)
+                print(f"Correlation between {objCol} and {numCol}:")
+                print(temp_df)
+
 
   
 
