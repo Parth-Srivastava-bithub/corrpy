@@ -33,6 +33,15 @@ corrpy = Corrpy()
 
 ## 🧪 Quick Usage
 
+
+```python
+corrpy.getMethods()
+```
+
+> Returns a list of all available methods in Corrpy.
+
+
+
 ```python
 corrpy.getTotalCorrRelation(df)
 ```
@@ -64,14 +73,69 @@ corrpy.getAllGroupInf(df)
 
 ## Get AI Insights
 
-```python
-corrpy.explainAITC(df)
-```
-`explainAITC` function takes a DataFrame as an input. It will compute the correlation between all object columns and all numeric columns. The correlation includes the strength of correlation, trend of the correlation, and the type of correlation (positive or negative). If the correlation is not significant, it will return a message indicating that there is no significant correlation.
+Sure bro 😎 here’s a **detailed and clean** markdown block you can directly plug into your README:
 
 ---
 
-![alt text](image-2.png)
+### 🔐 `setApi()`
+Securely handles your [Together.ai](https://www.together.ai/) API token:
+- Prompts you once for your API token.
+- Saves it locally in `api_token.txt`.
+- Automatically loads it in future runs.
+- You don’t need to paste it every time – just plug & play. 🛠️
+
+
+---
+
+### 📊 `explainAITC(df)`
+Let AI become your personal analyst 🧠:
+- Takes your correlation insights and turns them into **easy-to-read, friendly reports**.
+- Explains **Numeric vs Numeric**, **Numeric vs Object**, **Object vs Object**, and even **Transitive Relations**.
+- Ideal for **non-technical stakeholders**, managers, or presentations.
+- Uses storytelling, emojis, bullets, and markdown for impact.
+
+📝 **Example Use Case:**  
+Get a summary that reads like a newsletter:  
+_"Sales and Ad Spend are strongly related. But interestingly, Region affects Product Category preferences, forming a hidden dependency."_
+
+![alt text](image-5.png)
+
+---
+
+### 🔁 `shift(num1, num2, shiftValue, df)`
+Test how your dependent variable reacts to small changes in an input variable:
+- Trains a Linear Regression model on `num1 ➝ num2`.
+- Simulates a percentage change (`shiftValue`) in `num1`.
+- Predicts new outcomes and compares the drift in mean of `num2`.
+
+📌 **Returns:**  
+- `% Drift` → How much the outcome changes in percentage.
+- `Previous Mean` → Mean of actual target.
+- `New Mean` → Mean of shifted prediction.
+- `Difference` → Absolute change.
+
+Great for **“what if”** analysis and understanding sensitivity of models.
+
+![alt text](image-4.png)
+
+---
+
+### 🧠 `explainShift(num1, num2, shiftValue, df)`
+An AI analyst explains the output of `shift()` like you're in a meeting with your CEO:
+- Interprets how impactful the shift is.
+- Uses storytelling, avoids jargon.
+- Suggests whether the shift is significant or negligible.
+- Super engaging and compact 💬✨
+
+🎯 **Perfect For:**  
+- Presenting shift results to non-technical folks  
+- Feature sensitivity explanation  
+- Strategy discussions or model audits
+
+
+
+![alt text](image-3.png)
+
 
 ## 🧩 Features
 
@@ -190,4 +254,6 @@ The correlation and relationships presented in this analysis help you understand
 BSD 3-Clause License
 
 ---
+
+
 

@@ -641,6 +641,174 @@ class Corrpy:
     ai_output = response.choices[0].message.content
     print(ai_output)
 
+  def setApi(self):
+    import os
+
+    # Check if API token is saved already
+    if os.path.exists("api_token.txt"):
+        with open("api_token.txt", "r") as file:
+            apiToken = file.read().strip()
+        print("API Token loaded from file.")
+        return apiToken
+
+    print("Do You Have API Token (y/n)?")
+    flag = input()
+
+    if (flag.lower() == "y"):
+        apiToken = input("Please paste your API token here: ")
+        with open("api_token.txt", "w") as file:
+            file.write(apiToken)
+        print("API Token saved for future use.")
+    else:
+        print("Go to https://www.together.ai/ and generate your token. IT'S FREE!!")
+        print("Then paste it here:")
+        apiToken = input()  # Get the API token from the user
+        with open("api_token.txt", "w") as file:
+            file.write(apiToken)
+        print("API Token saved for future use.")
+
+    return apiToken
+
+  def explainAITC(self, df):
+    nvn = self.getLabled(self.getNumFeatures(df))
+    nvo = self.getCorrObjDtype(df)
+    nordinal = Nordinal()
+    ovo = nordinal.getObjvsObj(df)
+    transit = self.getTransitRelations(df)
+
+    apiToken = self.setApi()  # Get the API token
+
+    from together import Together
+    msg = f"""
+    🧠 You are a skilled data analyst ai agent.
+    Use the correlation summary below and return an insightful, business-friendly explanation in simple words, ideal for non-technical stakeholders.
+
+    🧾 Here’s the insight summary:
+
+    📊 Numeric vs Numeric: {nvn}
+
+    🔢➡️🔤 Numeric vs Object: {nvo}
+
+    🔤 vs 🔤 Object vs Object: {ovo}
+
+    🔁 Transitive Relations: {transit}
+
+    🎯 Your task:
+
+    Break it down like you're explaining to a curious manager.
+
+    Use Markdown, large paragraphs, bullet points, and emojis.
+    Use Story Telling way of explaining reports.
+    Keep it under 500 words.
+
+    Make it friendly, clear, and actionable.
+
+    Add a short “So what does this mean for us?” section at the end.
+
+    """
+
+    client = Together(api_key=apiToken)  # Use the token here
+
+    response = client.chat.completions.create(
+        model="meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
+        messages=[{"role": "user", "content": msg}]
+    )
+
+    ai_output = response.choices[0].message.content
+    print(ai_output)
+
+
+
+  def getMethods(self):
+    print("corrpy.getTotalCorrRelation(df)")
+    print("corry.getGroupInf(obj_col, num_col, df)")
+    print("corrpy.getAllGroupInf(df)")
+    print("corrpy.explainAITC(df)")
+    print("corrpy.explain(func_name)")
+    print("corrpy.shift(num1, num2, shiftConstant, df)")
+    print("corrpy.getMethods()")
+
+
+  def shift(self, num1, num2, shiftValue, df):
+    from sklearn.linear_model import LinearRegression
+    import numpy as np  
+    model = LinearRegression()
+
+    model.fit(df[[num1]], df[num2])
+    XShifted = df[[num1]] * (1 + (shiftValue / 100))
+
+    yPredShifted = model.predict(XShifted)
+    aboluteDrift = yPredShifted - df[num2]
+    percentDrift = aboluteDrift / df[num2] * 100
+    prevMean = df[num2].mean()
+    newMean = yPredShifted.mean() 
+    percentDrift = ((newMean - prevMean) / prevMean) * 100
+
+    shiftDF = (percentDrift, prevMean, newMean, newMean - prevMean)
+    
+    return pd.DataFrame({
+    "% Drift": percentDrift,
+    "Previous Mean": prevMean,
+    "New Mean": newMean,  
+    "Difference": newMean - prevMean
+      }, index = [0]) 
+
+  def explainShift(self, num1, num2, shiftValue, df):
+    from together import Together
+
+    shiftedDF = self.shift(num1, num2, shiftValue, df)
+    apiToken = self.setApi()  # Get the API token
+    msg = f"""
+
+    🧠 **You are a skilled data analyst AI agent.**     
+      You have been given a task to analyze the output of a method called `shift`, which is used to estimate how a dependent variable (say, target feature) changes when the independent variable (input feature) is slightly shifted.
+
+      📊 Here's the **output** of the `shift` method:
+        ```
+        {shiftedDF}
+        ```
+
+        🔧 The `shift` method takes **4 parameters**:  
+        1. `num1` – Name of the independent variable (input feature)  
+        2. `num2` – Name of the dependent variable (target feature)  
+        3. `shiftValue` – The percentage by which we want to shift the independent variable  
+        4. `df` – The input DataFrame
+
+    🧪 **How it works:**  
+        - A linear regression model is trained using `num1` to predict `num2`.  
+        - Then, the input feature `num1` is shifted by a percentage (`shiftValue`) to simulate change.  
+        - New predictions are made with this shifted data.  
+        - The difference between the original and new predictions is analyzed to compute the **drift**.
+
+        📈 **The output** contains 4 columns:  
+        1. **% Drift** – The percentage change in the predicted mean after shift  
+        2. **Previous Mean** – The mean of the original target variable (`num2`)  
+        3. **New Mean** – The mean of the predicted target values after shifting input  
+        4. **Difference** – The absolute change between new and previous means
+
+        🎯 **Your Task:**  
+        - Analyze the `shiftedDF` output.  
+        - Interpret what the values say about how the target feature reacts to a change in the input feature.  
+        - Help explain if the drift is significant, increasing, decreasing, or negligible.
+          dont show any code in output just explain the output in storymode
+
+          make output compact so that user dosen't feel bore
+          Add emojies where u can 
+
+          """
+
+    client = Together(api_key=apiToken)  # Use the token here
+
+    response = client.chat.completions.create(
+        model="meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
+        messages=[{"role": "user", "content": msg}]
+    )
+
+    ai_output = response.choices[0].message.content
+    print(ai_output)
+
+
+
   
 
 
