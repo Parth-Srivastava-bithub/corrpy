@@ -73,9 +73,6 @@ corrpy.getAllGroupInf(df)
 
 ## Get AI Insights
 
-Sure bro 😎 here’s a **detailed and clean** markdown block you can directly plug into your README:
-
----
 
 ### 🔐 `setApi()`
 Securely handles your [Together.ai](https://www.together.ai/) API token:
