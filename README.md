@@ -129,7 +129,7 @@ An AI analyst explains the output of `shift()` like you're in a meeting with you
 - Feature sensitivity explanation  
 - Strategy discussions or model audits
 
-
+![alt text](image-3.png)
 
 ### ⚠️ `checkTransit(firstFeature, secondFeature, ThirdFeature)`
 
@@ -140,7 +140,7 @@ The method first calculates the pairwise correlation between the three features 
 It's a super powerful method that can reveal hidden relationships between features, which can be game-changing for your models and insights. It's like having a superpower in your analysis toolkit! 💪
 
 
-![alt text](image-3.png)
+
 
 
 ## 🧩 Features
