@@ -906,6 +906,31 @@ class Corrpy:
 
     return getPartialCorrelation(returnList(firstFeature, secondFeature, ThirdFeature))  
 
+  def explainPC(self, firstFeature, secondFeature, ThirdFeature, df):
+    from together import Together
+    transitScore = self.checkTransit(firstFeature, secondFeature, ThirdFeature, df)
+    apiToken = self.setApi()  # Get the API token
+    msg = f"""
+🧠 You are a skilled data analyst AI agent.
+Use the correlation summary below and return an insightful, business-friendly explanation in simple words, ideal for non-technical stakeholders.
+
+The goal is to explain whether the observed relationship between '{firstFeature}' and '{secondFeature}' is real, or if it's caused by their mutual connection with '{ThirdFeature}'.
+
+Use the partial correlation value of {transitScore:.2f} to support your explanation. Be clear, concise, and focus on real-world implications without technical jargon.
+
+
+Explain in TWO LINES JUST but break in middles to avoid scorrling right side so much
+and show the report at last directly for proof without any md format
+"""
+    client = Together(api_key=apiToken)  # Use the token here
+
+    response = client.chat.completions.create(
+        model="meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
+        messages=[{"role": "user", "content": msg}]
+    )
+
+    ai_output = response.choices[0].message.content
+    print(ai_output)
 
 
 
