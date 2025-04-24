@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: Corrpy
-Version: 0.1.7
+Version: 0.2.8
 Summary: Correlation analysis tool with smart interpretation
 Home-page: https://github.com/Parthdsaiml/corrpy
 Author: YellowForest
@@ -88,9 +88,6 @@ corrpy.getAllGroupInf(df)
 
 ## Get AI Insights
 
-Sure bro 😎 here’s a **detailed and clean** markdown block you can directly plug into your README:
-
----
 
 ### 🔐 `setApi()`
 Securely handles your [Together.ai](https://www.together.ai/) API token:

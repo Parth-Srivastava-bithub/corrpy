@@ -131,6 +131,15 @@ An AI analyst explains the output of `shift()` like you're in a meeting with you
 
 
 
+### ⚠️ `checkTransit(firstFeature, secondFeature, ThirdFeature)`
+
+`checkTransit` method takes three feature names as inputs and checks if there is a **transitive relation** between them. It returns a boolean to indicate whether the transitive relation exists or not.
+
+The method first calculates the pairwise correlation between the three features using the `corr` method. It then calculates the partial correlation between the first feature and second feature while controlling for the third feature. The partial correlation is calculated using the formula for partial correlation, which involves the three pairwise correlations. If the partial correlation is not zero, then a transitive relation exists between the three features.
+
+It's a super powerful method that can reveal hidden relationships between features, which can be game-changing for your models and insights. It's like having a superpower in your analysis toolkit! 💪
+
+
 ![alt text](image-3.png)
 
 

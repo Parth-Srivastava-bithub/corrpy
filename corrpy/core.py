@@ -559,6 +559,85 @@ class Corrpy:
             "• obj_col2 vs num_col1, num_col2, etc. \n"
             "Please Enter 'getGroupInf' also to get detail explanation\n"
             "📘 Terms explained here → https://github.com/Parthdsaiml/corrpy?tab=readme-ov-file#get-to-know-how-each-cateogry-effect-correlation-with-other-numeric-values"
+        ),
+         "explainAITC": (
+    "🧠 **explainAITC(df)** is your AI-powered correlation storyteller.\n"
+    "It analyzes the entire DataFrame and generates a comprehensive, yet easy-to-understand, \n"
+    "narrative about the relationships between your columns. \n"
+    "Think of it as an automated report generator that explains insights from `getTotalCorrRelation`, \n"
+    "`getGroupInf`, and transitive relations in plain English, using Together.ai's powerful language model.\n\n"
+    "🔑 **How it works:**\n"
+    "1. **Correlation Analysis:** It first runs various correlation checks like:\n"
+    "   - Numeric vs. Numeric (using `getLabled`)\n"
+    "   - Numeric vs. Object (using `getCorrObjDtype`)\n"
+    "   - Object vs. Object (using `Nordinal.getObjvsObj`)\n"
+    "   - Transitive relations (indirect links)\n"
+    "2. **Insight Generation:** It then feeds this summary to a large language model \n"    
+    "(Llama-4-Maverick-17B-128E-Instruct-FP8 from Together.ai). \n"
+    "3. **Storytelling:** The AI crafts a narrative explaining the key findings in a way \n"
+    "that's clear, concise, and actionable.\n\n"
+    "🚀 **Why use it?**\n"
+    "• **Bridge the technical gap:** Explain complex correlations to non-technical audiences \n"    
+    "without jargon or code.\n"
+    "• **Save time:** Automate the creation of insightful correlation reports.\n"
+    "• **Focus on actions:** The narrative highlights the 'So what?' to drive decision-making.\n\n"
+    "🚨 **Important:**\n"
+    "Requires an API token from Together.ai (free tier available).\n"
+    "The method will guide you through setting this up."
+),
+
+"explainShift": (
+    "🔍 **explainShift(num1, num2, shiftValue, df)** provides an AI-powered explanation of the 'shift' method's results.\n"
+    "It's like having a data analyst interpret how a target feature reacts to changes in an input feature.\n\n"
+    "⚙️ **How it works:**\n"
+    "1. **Shift Calculation:** It first uses the `shift` method to calculate the drift (change in the \n"
+    "target feature's predicted mean) when the input feature is shifted by a percentage (`shiftValue`).\n"
+    "2. **AI Interpretation:** This drift information is then sent to Together.ai's language model \n"    
+    "(Llama-4-Maverick-17B-128E-Instruct-FP8).\n"
+    "3. **Explanation:** The AI provides a clear explanation of the observed drift, telling you if \n"
+    "it's significant, increasing, decreasing, or negligible, in plain language.\n\n"
+    "🚀 **Why use it?**\n"
+    "• **Gain deeper understanding:** Easily grasp the impact of input changes on your target feature \n"    
+    "without complex analysis.\n"
+    "• **Communicate insights:** Share clear, concise explanations of drift with stakeholders.\n\n"
+    "🚨 **Important:**\n"
+    "Requires an API token from Together.ai (free tier available).\n"
+    "The method will prompt you to set this up if needed."
+),
+
+"shift": (
+    "📈 **shift(num1, num2, shiftValue, df)** estimates how a dependent variable (`num2`) changes \n"
+    "when the independent variable (`num1`) is slightly shifted by `shiftValue` percentage.\n\n"
+    "⚙️ **How it works:**\n"
+    "1. **Model Training:** A linear regression model is trained to predict `num2` based on `num1`.\n"
+    "2. **Shifting:** The `num1` column is shifted by the given `shiftValue` percentage to simulate change.\n"
+    "3. **Prediction:** New predictions are made using the shifted data.\n"
+    "4. **Drift Calculation:** The method calculates the drift - the percentage change in the \n"
+    "predicted mean of `num2` caused by the shift in `num1`.\n\n"
+    "🚀 **Why use it?**\n"
+    "• **What-if analysis:** Understand the impact of changing your input features on the target feature.\n"
+    "• **Sensitivity analysis:** Explore the relationship and dependency between features.\n"
+    "• **Risk assessment:** Simulate scenarios to evaluate the potential consequences of shifts in data.\n\n"
+    "📤 **Output:**\n"
+    "A DataFrame containing:\n"
+    " - '% Drift': Percentage change in predicted mean of `num2`.\n"
+    " - 'Previous Mean': Mean of the original `num2`.\n"
+    " - 'New Mean': Predicted mean of `num2` after shifting `num1`.\n"
+    " - 'Difference': Absolute difference between new and previous means."
+    ),
+        "checkTransit": (
+            "🔍 **checkTransit(firstFeature, secondFeature, ThirdFeature, df)** finds the partial correlation between three given features.\n"
+            "It's like having a data analyst tell you if there's a direct correlation between two of the features \n"
+            "while controlling for the third feature.\n\n"
+            "⚙️ **How it works:**\n"
+            "1. **Calculate Correlations:** Calculate the correlation between each pair of features.\n"
+            "2. **Partial Correlation:** Calculate the partial correlation between firstFeature and secondFeature \n"
+            "while controlling for ThirdFeature.\n\n"
+            "🚀 **Why use it?**\n"
+            "• **Deeper understanding:** Easily identify the existence of a direct correlation between two features.\n"
+            "• **Filtering out indirect correlations:** Identify correlations that are due to the presence of a third feature.\n\n"
+            "📤 **Output:**\n"
+            "The partial correlation between the first two features while controlling for the third feature.\n"
         )
     }
 
@@ -807,9 +886,25 @@ class Corrpy:
     ai_output = response.choices[0].message.content
     print(ai_output)
 
+  def checkTransit(self, firstFeature, secondFeature, ThirdFeature, df):
+    def returnList(firstFeature, secondFeature, ThirdFeature):
+      corrList = []
+      corrList.append(df[firstFeature].corr(df[secondFeature])) 
+      corrList.append(df[firstFeature].corr(df[ThirdFeature]))  
+      corrList.append(df[secondFeature].corr(df[ThirdFeature])) 
+      return corrList
 
+    def getPartialCorrelation(corrList):
+      r_XY = corrList[0]
+      r_XZ = corrList[1]
+      r_YZ = corrList[2]      
+    
+      numerator = r_XY - (r_XZ * r_YZ)
+      denominator = ((1 - r_XZ**2) * (1 - r_YZ**2))**0.5
+    
+      return numerator / denominator if denominator != 0 else 0
 
-  
+    return getPartialCorrelation(returnList(firstFeature, secondFeature, ThirdFeature))  
 
 
 

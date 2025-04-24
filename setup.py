@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = "Corrpy",
-    version = "0.1.7",
+    version = "0.2.8",
     packages = find_packages(),
     install_requires = [
         'pandas', 'numpy', 'scipy', 'matplotlib', 'seaborn', 'IPython', 'together', 'scikit-learn'
