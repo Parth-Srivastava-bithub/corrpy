@@ -5,7 +5,7 @@
 ![License](https://img.shields.io/pypi/l/corrpy)
 ![Python](https://img.shields.io/pypi/pyversions/corrpy)
 ![Maintenance](https://img.shields.io/maintenance/yes/2025)
-![Stars](https://img.shields.io/github/stars/your-username/corrpy?style=social)
+![Stars](https://img.shields.io/github/stars/parthdsaiml/corrpy?style=social)
 
 
 
