@@ -1,11 +1,11 @@
 # 🧠 CorrPY – Correlation with Ease
 
 ![PyPI version](https://img.shields.io/pypi/v/corrpy)
-![PyPI Downloads](https://img.shields.io/pypi/dm/corrpy)
-![License](https://img.shields.io/badge/license-BSD%203--Clause-blue)
-![Powered by NumFOCUS](https://img.shields.io/badge/powered%20by-NumFOCUS-blue)
-
-
+![Downloads](https://img.shields.io/pypi/dm/corrpy)
+![License](https://img.shields.io/pypi/l/corrpy)
+![Python](https://img.shields.io/pypi/pyversions/corrpy)
+![Maintenance](https://img.shields.io/maintenance/yes/2025)
+![Stars](https://img.shields.io/github/stars/your-username/corrpy?style=social)
 
 
 
