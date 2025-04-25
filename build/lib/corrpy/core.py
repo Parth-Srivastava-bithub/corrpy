@@ -806,6 +806,13 @@ class Corrpy:
     print("corrpy.explain(func_name)")
     print("corrpy.shift(num1, num2, shiftConstant, df)")
     print("corrpy.getMethods()")
+    print("corrpy.setApi()")
+    print("corrpy.explainShift(num1, num2, shiftConstant, df)")
+    print("corrpy.checkTransit(firstFeature, secondFeature, ThirdFeature)")
+    print("corrpy.explainPC(num1, num2, df)")
+    print("corrpy.checkTransitForColumn(column, df)")
+    print("corrpy.explainTransitForcolumn(column, df)")
+
 
 
   def shift(self, num1, num2, shiftValue, df):
