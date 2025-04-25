@@ -40,9 +40,9 @@ corrpy = Corrpy()
 7. `shift(num1, num2, shiftValue, df)`: Test how your dependent variable reacts to small changes in an input variable.
 8. `explainShift(num1, num2, shiftValue, df)`: An AI analyst explains the output of `shift()` like you're in a meeting with your CEO.
 9. `checkTransit(firstFeature, secondFeature, ThirdFeature)`: Check for transitive correlation between three features.
-10. `explainPC(num1, num2, df)`: Get AI insights for partial correlation analysis.
+10. `explainPartialCorrelation(num1, num2, df)`: Get AI insights for partial correlation analysis.
 11. `checkTransitForColumn(column, df)`: Check for transitive correlation between a column and all other columns.
-12. `explainTransitForcolumn(column, df)`: An AI analyst explains the output of `checkTransitForColumn()` like you're in a meeting with your CEO.
+12. `explainTransitForcolumn(column, df, mode = "MOOD")`: An AI analyst explains the output of `checkTransitForColumn()` like you're in a meeting with your CEO.
 ---
 
 ## 🧪 Quick Usage

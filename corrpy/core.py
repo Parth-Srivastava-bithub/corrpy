@@ -800,7 +800,7 @@ class Corrpy:
 
   def getMethods(self):
     print("corrpy.getTotalCorrRelation(df)")
-    print("corry.getGroupInf(obj_col, num_col, df)")
+    print("corrpy.getGroupInf(obj_col, num_col, df)")
     print("corrpy.getAllGroupInf(df)")
     print("corrpy.explainAITC(df)")
     print("corrpy.explain(func_name)")
@@ -913,7 +913,7 @@ class Corrpy:
 
     return getPartialCorrelation(returnList(firstFeature, secondFeature, ThirdFeature))  
 
-  def explainPC(self, firstFeature, secondFeature, ThirdFeature, df):
+  def explainPartialCorrelation(self, firstFeature, secondFeature, ThirdFeature, df):
     from together import Together
     transitScore = self.checkTransit(firstFeature, secondFeature, ThirdFeature, df)
     apiToken = self.setApi()  # Get the API token
@@ -947,21 +947,20 @@ and show the report at last directly for proof without any md format
             if col1 != col2 and col1 != feature and feature != col2:
                 transitList.append(
                     (col1, col2, feature, df[feature].corr(df[col1]),
-                     df[feature].corr(df[col2]), df[col1].corr(df[col2]),
-                     self.checkTransit(col1, col2, feature, df)))
+                     self.checkTransit(col1, col2, feature, df), df[feature].corr(df[col1]) - self.checkTransit(col1, col2, feature, df)))
     transitDF = pd.DataFrame(transitList,
                               columns=["Feature A", "Feature B",
                                        "Removed Influence", "Score XY",
-                                       "Score XZ", "Score YZ",
-                                       "After Score XY"])
+                                       "After Score XY",
+                                       "Difference"])
     # Sort and assign back to the columns without using .str
     transitDF[['Feature A', 'Feature B']] = transitDF[['Feature A', 'Feature B']].apply(
     lambda row: sorted(row), axis=1, result_type='expand')
-    transitDF = transitDF.drop_duplicates(subset=["Feature A", "Feature B", "Removed Influence"], keep="first")  
-
+    transitDF = transitDF.drop_duplicates(subset=["Feature A", "Feature B", "Removed Influence"], keep="first")
+    transitDF = transitDF.sort_values(by="Difference", ascending=False)
     return transitDF
 
-  def explainTransitForColumn(self, feature, df):
+  def explainTransitForColumn(self, feature, df, mode = "funny"):
     from together import Together
     transitDF = self.checkTransitForColumn(feature, df)
     apiToken = self.setApi()  # Get the API token
@@ -981,12 +980,13 @@ keep the para plain no md format
 
 and at last explain each thing
 1. What removed
-2. What effects before and after 
+2. What effects before and after
 3. Whats the result
-4. Is this really transitive or not 
+4. Is this really transitive or not
 keep check the cols put correct names of cols {transitDF}
-and add emojies to make this attractive report 
-might add some jokes too in sarcasm way
+and add emojies to make this attractive report
+always try to answer in {mode} way to make it more interactive
+and add sarcasm where u can
 
 """
     client = Together(api_key=apiToken)  # Use the token here
@@ -1001,8 +1001,7 @@ might add some jokes too in sarcasm way
 
 
 
-
-
+    
 
 
 
