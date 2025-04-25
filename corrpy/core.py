@@ -931,6 +931,66 @@ and show the report at last directly for proof without any md format
 
     ai_output = response.choices[0].message.content
     print(ai_output)
+  def checkTransitForColumn(self, feature, df):
+    numDf = df.select_dtypes(include=[np.number]).copy()
+
+    transitList = []
+    for col1 in numDf.columns:
+        for col2 in numDf.columns:
+            if col1 != col2 and col1 != feature and feature != col2:
+                transitList.append(
+                    (col1, col2, feature, df[feature].corr(df[col1]),
+                     df[feature].corr(df[col2]), df[col1].corr(df[col2]),
+                     self.checkTransit(col1, col2, feature, df)))
+    transitDF = pd.DataFrame(transitList,
+                              columns=["Feature A", "Feature B",
+                                       "Removed Influence", "Score XY",
+                                       "Score XZ", "Score YZ",
+                                       "After Score XY"])
+    # Sort and assign back to the columns without using .str
+    transitDF[['Feature A', 'Feature B']] = transitDF[['Feature A', 'Feature B']].apply(
+    lambda row: sorted(row), axis=1, result_type='expand')
+    transitDF = transitDF.drop_duplicates(subset=["Feature A", "Feature B", "Removed Influence"], keep="first")  
+
+    return transitDF
+
+  def explainTransitForColumn(self, feature, df):
+    from together import Together
+    transitDF = self.checkTransitForColumn(feature, df)
+    apiToken = self.setApi()  # Get the API token
+    msg = f"""
+🧠 You are a skilled data analyst AI agent.
+Use the correlation summary below and return an insightful, human-readable analysis with a business-friendly tone. Avoid technical jargon.
+
+Your goal:
+- Spot **transitive relationships** between features by analyzing how removing an intermediate variable (e.g., {feature}) affects the correlation between others.
+- Explain if any **indirect influences** or **hidden drivers** are revealed.
+- Highlight surprising patterns, such as **false correlations** that vanish when context is removed.
+- Use words like **insight**, **inference**, **causal clue**, **hidden linkage**, and **business signal** to add clarity and engagement.
+
+Return a short report that a CEO or product manager would easily understand and act upon.
+keep it within 3 lines and break lines in middle so that user dont have to scroll infinitely
+keep the para plain no md format
+
+and at last explain each thing
+1. What removed
+2. What effects before and after 
+3. Whats the result
+4. Is this really transitive or not 
+keep check the cols put correct names of cols {transitDF}
+and add emojies to make this attractive report 
+might add some jokes too in sarcasm way
+
+"""
+    client = Together(api_key=apiToken)  # Use the token here
+
+    response = client.chat.completions.create(
+        model="meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
+        messages=[{"role": "user", "content": msg}]
+    )
+
+    ai_output = response.choices[0].message.content
+    print(ai_output)
 
 
 

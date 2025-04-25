@@ -29,6 +29,20 @@ from corrpy import Corrpy
 corrpy = Corrpy()
 ```
 
+### All Methods you can use 
+
+1. `getMethods()`: Returns a list of all available methods in Corrpy.
+2. `getTotalCorrRelation(df)`: Pass a pandas DataFrame to get correlation analysis across all columns.
+3. `getGroupInf(objColumn, numColumn, df)`: Compute the correlation between the given object column and the given numeric column.
+4. `getAllGroupInf(df)`: Compute the correlation between all object columns and all numeric columns.
+5. `setApi()`: Securely handles your [Together.ai](https://www.together.ai/) API token.
+6. `explainAITC(df)`: Get AI insights for correlation analysis.
+7. `shift(num1, num2, shiftValue, df)`: Test how your dependent variable reacts to small changes in an input variable.
+8. `explainShift(num1, num2, shiftValue, df)`: An AI analyst explains the output of `shift()` like you're in a meeting with your CEO.
+9. `checkTransit(firstFeature, secondFeature, ThirdFeature)`: Check for transitive correlation between three features.
+10. `explainPC(num1, num2, df)`: Get AI insights for partial correlation analysis.
+11. `checkTransitForColumn(column, df)`: Check for transitive correlation between a column and all other columns.
+12. `explainTransitForcolumn(column, df)`: An AI analyst explains the output of `checkTransitForColumn()` like you're in a meeting with your CEO.
 ---
 
 ## 🧪 Quick Usage
