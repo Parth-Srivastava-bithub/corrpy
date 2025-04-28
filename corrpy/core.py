@@ -155,48 +155,20 @@ class Corrpy:
 
 
   def catCorr(self, corrValue, columnA, columnB, binsDict):
-    if (-1.0 <= corrValue < -0.9):
-        binsDict["[-1.0] <= x < [-0.9]"].append([columnA, columnB, corrValue])
-    elif (-0.9 <= corrValue < -0.8):
-        binsDict["[-0.9] <= x < [-0.8]"].append([columnA, columnB, corrValue])
-    elif (-0.8 <= corrValue < -0.7):
-        binsDict["[-0.8] <= x < [-0.7]"].append([columnA, columnB, corrValue])
-    elif (-0.7 <= corrValue < -0.6):
-        binsDict["[-0.7] <= x < [-0.6]"].append([columnA, columnB, corrValue])
-    elif (-0.6 <= corrValue < -0.5):
-        binsDict["[-0.6] <= x < [-0.5]"].append([columnA, columnB, corrValue])
-    elif (-0.5 <= corrValue < -0.4):
-        binsDict["[-0.5] <= x < [-0.4]"].append([columnA, columnB, corrValue])
-    elif (-0.4 <= corrValue < -0.3):
-        binsDict["[-0.4] <= x < [-0.3]"].append([columnA, columnB, corrValue])
-    elif (-0.3 <= corrValue < -0.2):
-        binsDict["[-0.3] <= x < [-0.2]"].append([columnA, columnB, corrValue])
-    elif (-0.2 <= corrValue < -0.1):
-        binsDict["[-0.2] <= x < [-0.1]"].append([columnA, columnB, corrValue])
-    elif (-0.1 <= corrValue < 0.0):
-        binsDict["[-0.1] <= x < [-0.0]"].append([columnA, columnB, corrValue])
-    elif (0.0 <= corrValue < 0.1):
-        binsDict["[-0.0] <= x < [0.1]"].append([columnA, columnB, corrValue])
-    elif (0.1 <= corrValue < 0.2):
-        binsDict["[0.1] <= x < [0.2]"].append([columnA, columnB, corrValue])
-    elif (0.2 <= corrValue < 0.3):
-        binsDict["[0.2] <= x < [0.3]"].append([columnA, columnB, corrValue])
-    elif (0.3 <= corrValue < 0.4):
-        binsDict["[0.3] <= x < [0.4]"].append([columnA, columnB, corrValue])
-    elif (0.4 <= corrValue < 0.5):
-        binsDict["[0.4] <= x < [0.5]"].append([columnA, columnB, corrValue])
-    elif (0.5 <= corrValue < 0.6):
-        binsDict["[0.5] <= x < [0.6]"].append([columnA, columnB, corrValue])
-    elif (0.6 <= corrValue < 0.7):
-        binsDict["[0.6] <= x < [0.7]"].append([columnA, columnB, corrValue])
-    elif (0.7 <= corrValue < 0.8):
-        binsDict["[0.7] <= x < [0.8]"].append([columnA, columnB, corrValue])
-    elif (0.8 <= corrValue < 0.9):
-        binsDict["[0.8] <= x < [0.9]"].append([columnA, columnB, corrValue])
-    elif (0.9 <= corrValue < 1.0):
-        binsDict["[0.9] <= x < [1.0]"].append([columnA, columnB, corrValue])
-    else:
-        pass
+    # Check if correlation value is outside the valid range
+    if corrValue < -1.0 or corrValue >= 1.0:
+        return binsDict
+
+    # Calculate the lower bound of the bin
+    lower = math.floor(corrValue * 10) / 10
+    upper = lower + 0.1
+
+    # Format the key string, adjusting for the special case of 0.0 to match original keys
+    lower_str = "-0.0" if lower == 0.0 else f"{lower:.1f}"
+    key = f"[{lower_str}] <= x < [{upper:.1f}]"
+
+    # Append the entry to the corresponding bin
+    binsDict.setdefault(key, []).append([columnA, columnB, corrValue])
 
     return binsDict
 
@@ -313,6 +285,11 @@ class Corrpy:
 
   def addTrends(self, df):
     def getTrends(corrValue):
+      if pd.isna(corrValue):  # This line checks if the value is NaN
+          return "▱▱▱▱▱" 
+      if (corrValue == 0):
+        return "▱▱▱▱▱"
+
       absCorrValue = abs(corrValue)
       barSegments = min(5, int(absCorrValue * 5))
       return '▰' * barSegments + '▱' * (5 - barSegments)
