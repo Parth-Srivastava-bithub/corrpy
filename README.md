@@ -2,6 +2,7 @@
 
 ![PyPI version](https://img.shields.io/pypi/v/corrpy)
 ![Downloads](https://img.shields.io/pypi/dm/corrpy)
+[![PyPI Downloads](https://static.pepy.tech/badge/corrpy)](https://pepy.tech/projects/corrpy)
 ![License](https://img.shields.io/pypi/l/corrpy)
 ![Python](https://img.shields.io/pypi/pyversions/corrpy)
 ![Maintenance](https://img.shields.io/maintenance/yes/2025)
