@@ -304,7 +304,9 @@ class Corrpy:
     from IPython.display import display, HTML
 
     display(HTML("<h3 style='color: teal;'>🔢 Numerical vs Numerical Relation</h3>"))
-    dfNum = self.getNvN(df, feature)
+    display(HTML(f"<p style='color: lightgreen;'>Sorted Trends and Interpretations are with respect to feature {feature}</p>"))
+    
+    dfNum = self.addTestsNvN(df, feature)
     dfNum = dfNum.rename(columns = {"Feature A": "Numerical Column A", "Feature B": "Numerical Column B", "Correlation": "Correlation Score"})
     if (short):
       print(dfNum.head())
@@ -619,7 +621,7 @@ class Corrpy:
 
     return apiToken
 
-  def explainAITC(self, df, feature = "Correlation"):
+  def explainAITC(self, df, feature = "Correlation", mode = "sarcasm"):
     nvn = self.addTestsNvN(df, feature)
     nvo = self.getCorrObjDtype(df)
     nordinal = Nordinal()
@@ -630,32 +632,49 @@ class Corrpy:
 
     from together import Together
     msg = f"""
-    🧠 You are a skilled data analyst ai agent.
-    Use the correlation summary below and return an insightful, business-friendly explanation in simple words, ideal for non-technical stakeholders.
-
-    🧾 Here’s the insight summary:
-
-    📊 Numeric vs Numeric: {nvn}
-
-    🔢➡️🔤 Numeric vs Object: {nvo}
-
-    🔤 vs 🔤 Object vs Object: {ovo}
-
-    🔁 Transitive Relations: {transit}
 
     🎯 Your task:
 
-    Break it down like you're explaining to a curious manager.
+    Enhanced Funny, Sarcastic Prompt for Manager-Style Updates in {mode}
+Task:
+Break down the data changes (like switching from basic correlation to feature-based analysis) in a storytelling style.
 
-    Use Markdown, large paragraphs, bullet points, and emojis.
-    Use Story Telling way of explaining reports.
-    Keep it under 500 words.
+Tone:
+Make it funny, sarcastic, light-hearted but still clear and professional.
 
-    Make it friendly, clear, and actionable.
+Format:
 
-    Add a short “So what does this mean for us?” section at the end.
+Use Markdown: headings, bullets, emojis.
 
-    Make all compact so that user didnt feel bored get 80% data by just quick view
+Write it like telling a funny short story.
+
+Keep it under 500 words — compact, breezy, easy to scan.
+
+Highlight changes using bold, italics, and emojis.
+
+Add a "So what does this mean for us?" section summarizing impact.
+
+End with a 5-point TL;DR summary table (short, punchy).
+
+Data Blocks to Insert:
+
+📊 Numeric vs Numeric: {nvn}
+
+🔢➡️🔤 Numeric vs Object: {nvo}
+
+🔤 vs 🔤 Object vs Object: {ovo}
+
+🔁 Transitive Relations: {transit}
+
+Style:
+
+70% fun 🌟
+
+30% serious business 💼
+
+No boring essay-like paragraphs; prefer tight storytelling chunks.
+
+
 
     """
 
@@ -672,15 +691,15 @@ class Corrpy:
 
 
   def getMethods(self):
-    print("corrpy.getTotalCorrRelation(df)")
-    print("corry.getGroupInf(obj_col, num_col, df)")
+    print("corrpy.getTotalCorrRelation(df, feature = 'Pearson/Spearman/Distance')")
+    print("corrpy.getGroupInf(obj_col, num_col, df)")
     print("corrpy.getAllGroupInf(df)")
     print("corrpy.explainAITC(df)")
     print("corrpy.explain(func_name)")
     print("corrpy.shift(num1, num2, shiftConstant, df)")
+    print("corrpy.explainShift(num1, num2, shiftConstant, df)")
     print("corrpy.getMethods()")
-
-
+  
   def shift(self, num1, num2, shiftValue, df):
     from sklearn.linear_model import LinearRegression
     import numpy as np
@@ -947,7 +966,14 @@ and add sarcasm where u can
         df = pd.DataFrame(corrs, columns=["Feature A", "Feature B", "Distance"])
 
     else:
-        df = self.generateInterpreations(self.getLabled(self.getNumFeatures(df).copy(), feature=feature)) 
+        dfNum = self.getNumFeatures(df).copy()
+        corrs = []
+        for colA in dfNum.columns:
+            for colB in dfNum.columns:
+                if colA != colB:
+                    corrValue = dfNum[colA].corr(dfNum[colB])
+                    corrs.append([colA, colB, corrValue])
+        df = pd.DataFrame(corrs, columns=["Feature A", "Feature B", "Correlation"]) 
     return df
   
   def addInterpretationsBasedOnFeature(self, df, feature):

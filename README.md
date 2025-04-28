@@ -37,7 +37,7 @@ corrpy = Corrpy()
 3. `getGroupInf(objColumn, numColumn, df)`: Compute the correlation between the given object column and the given numeric column.
 4. `getAllGroupInf(df)`: Compute the correlation between all object columns and all numeric columns.
 5. `setApi()`: Securely handles your [Together.ai](https://www.together.ai/) API token.
-6. `explainAITC(df)`: Get AI insights for correlation analysis.
+6. `explainAITC(df, feature = None, mode = "MOOD")`: Get AI insights for correlation analysis.
 7. `shift(num1, num2, shiftValue, df)`: Test how your dependent variable reacts to small changes in an input variable.
 8. `explainShift(num1, num2, shiftValue, df)`: An AI analyst explains the output of `shift()` like you're in a meeting with your CEO.
 9. `checkTransit(firstFeature, secondFeature, ThirdFeature)`: Check for transitive correlation between three features.
