@@ -619,8 +619,8 @@ class Corrpy:
 
     return apiToken
 
-  def explainAITC(self, df):
-    nvn = self.getLabled(self.getNumFeatures(df))
+  def explainAITC(self, df, feature = "Correlation"):
+    nvn = self.addTestsNvN(df, feature)
     nvo = self.getCorrObjDtype(df)
     nordinal = Nordinal()
     ovo = nordinal.getObjvsObj(df)
