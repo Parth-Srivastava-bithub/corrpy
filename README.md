@@ -6,7 +6,7 @@
 ![Python](https://img.shields.io/pypi/pyversions/corrpy)
 ![Maintenance](https://img.shields.io/maintenance/yes/2025)
 ![Stars](https://img.shields.io/github/stars/parthdsaiml/corrpy?style=social)
-
+[![PyPI Downloads](https://static.pepy.tech/badge/corrpy)](https://pepy.tech/projects/corrpy)
 
 
 **CorrPY** is a lightweight Python library that simplifies correlation analysis with intuitive insights and visual patterns. It's built for data scientists who want quick, meaningful interpretation instead of just numbers.
