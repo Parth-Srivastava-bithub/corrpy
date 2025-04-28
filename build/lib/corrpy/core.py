@@ -99,18 +99,30 @@ class Corrpy:
     return binsDict
 
 
-  def fillDict(self, df, toDF = False):
+  def fillDict(self, df, toDF = False, way = "correlation"):
     df = df.select_dtypes(include=[np.number])
+    way = way.capitalize()
     binsDict = self.getDict()
     for colA in df.columns:
       for colb in df.columns:
         if (colA != colb):
-          corrValue = df[colA].corr(df[colb])
+          if (way == "Correlation"):
+            corrValue = df[colA].corr(df[colb])
+          else:
+            corrValue = self.pearsonTest(colA, colb, df)
           self.catCorr(corrValue, colA, colb, binsDict)
     self.filterDict(binsDict)
     if (toDF):
       return self.formatBinsDicts(binsDict, toDF)
     return self.formatBinsDicts(binsDict)
+
+  def pearsonTest(self, cola, colb, df):
+    corrValue = df[cola].corr(df[colb])
+    return corrValue
+
+  def spearmanTest(self, cola, colb, df):
+    corrValue = df[cola].corr(df[colb], method = "spearman")
+    return corrValue
 
   def filterDict(self, binsDict):
     # Create a list of keys to delete to avoid modifying the dictionary during iteration
@@ -234,56 +246,21 @@ class Corrpy:
 
 
 
-  def getLabled(self, df):
-    scoreMatrix = self.fillDict(df, toDF = True)
-    bins = [0, 0.3, 0.8, float("inf")]
-    labels = ["Low", "Medium", "High"]
-    scoreMatrix["Strength"] = pd.cut(scoreMatrix["Correlation"], bins = bins, labels = labels)
+  def getLabled(self, df, feature = "Correlaton"):
+    scoreMatrix = self.fillDict(df, toDF = True, way = feature)
+    bins = [-1.0, -0.5, -0.3, 0.3, 0.8, float("inf")]
+    #The number of bins is 6.
+    labels = ["High", "Medium", "Low", "Medium", "High"]
+    #The number of labels is now 5, one less than the number of bins.
+    # The ordered parameter is set to False to allow duplicate labels
+    scoreMatrix["Strength"] = pd.cut(scoreMatrix[feature], bins=bins, labels=labels, ordered=False)
+
     return scoreMatrix
 
 
-  def generateInterpreations(self, df):
-    def generateInterpreationsForFeatureAB(featureA, featureB, correlation):
-      absCorr = abs(correlation)
-      direction = '↑' if correlation > 0 else '↓'
-      if (correlation > 0 and correlation < 0.7):
-        strengthSymbol = "↑"
-      elif (correlation < 0 and correlation > -0.7):
-        strengthSymbol = "↓"
-      elif (correlation > 0.7 and correlation < 0.9):
-        strengthSymbol = "↑↑"
-      elif (correlation > -0.9 and correlation < -0.7):
-        strengthSymbol = "↓↓"
-      elif (correlation > 0.9):
-        strengthSymbol = "↑↑↑"
-      elif (correlation < -0.9):
-        strengthSymbol = "↓↓↓"
-      else:
-        strengthSymbol = "-"
+  
 
-      if (absCorr >= 0.8):
-        insight = f"{strengthSymbol} Strong: Direct Driver"
-      elif (0.6 <= absCorr < 0.8):
-        insight = f"{strengthSymbol} Key Factor but not only Driver"
-      elif (0.4 <= absCorr < 0.6):
-        insight = f"{direction} Moderate: Linked Trend"
-      elif (0.2 <= absCorr < 0.4):
-        insight = f"{direction} Weak: Contextual"
-      else:
-        insight = f"No linkage"
-      return insight
-
-    def generate(row):
-      featureA = row["Feature A"]
-      featureB = row["Feature B"]
-      corr = row["Correlation"]
-
-      return generateInterpreationsForFeatureAB(featureA, featureB, corr)
-    df["Interpretation"] = df.apply(generate, axis = 1)
-    self.addTrends(df)
-    return df
-
-  def addTrends(self, df):
+  def addTrends(self, df, Feature = "Correlation"):
     def getTrends(corrValue):
       if pd.isna(corrValue):  # This line checks if the value is NaN
           return "▱▱▱▱▱" 
@@ -294,7 +271,7 @@ class Corrpy:
       barSegments = min(5, int(absCorrValue * 5))
       return '▰' * barSegments + '▱' * (5 - barSegments)
 
-    df["Trend"] = df["Correlation"].apply(getTrends)
+    df["Trend"] = df[Feature].apply(getTrends)
     return df
 
   def getNumFeatures(self, df):
@@ -321,12 +298,14 @@ class Corrpy:
     objCorrNum = self.addTrends(objCorrNum)
     return objCorrNum
 
+  
 
-  def getTotalCorrRelation(self, df, short = False):
+  def getTotalCorrRelation(self, df, feature = "Correlation", short = False,):
     from IPython.display import display, HTML
 
     display(HTML("<h3 style='color: teal;'>🔢 Numerical vs Numerical Relation</h3>"))
-    dfNum = self.generateInterpreations(self.getLabled(self.getNumFeatures(df).copy()))
+    dfNum = self.getNvN(df, feature)
+    dfNum = dfNum.rename(columns = {"Feature A": "Numerical Column A", "Feature B": "Numerical Column B", "Correlation": "Correlation Score"})
     if (short):
       print(dfNum.head())
     else:
@@ -339,7 +318,7 @@ class Corrpy:
       print(dfObj.head())
     else:
       print(dfObj)
-    
+
     display(HTML("<p style='color: red;'>These correlations show there's some link, but not whether it's positive or negative. Just a heads-up, not a verdict</p>"))
 
     nordinal = Nordinal()
@@ -472,6 +451,8 @@ class Corrpy:
     corrDf = self.generateInterpreations(corrDf)
     corrDf = self.addTrends(corrDf)
     return corrDf
+
+
   def getGroupInf(self, objColumn, numColumn, df):
     dummies = pd.get_dummies(df[objColumn])
     df = pd.concat([df, dummies], axis = 1)
@@ -479,10 +460,10 @@ class Corrpy:
     correlations = dfDummies.corr()[numColumn].drop(numColumn)
 
     return correlations
-  
+
   def getAllGroupInf(self, df):
         df = df.copy()
-        
+
         # Separate the object and numerical columns
         dfObj = df.select_dtypes(include=[object])
         dfNum = df.select_dtypes(include=[np.number])
@@ -492,7 +473,7 @@ class Corrpy:
             for numCol in dfNum.columns:
                 # Get the correlation values
                 dfGroup = self.getGroupInf(objCol, numCol, df)
-                
+
                 # Convert the correlation series to a DataFrame with 'category' and 'score' columns
                 temp_df = pd.DataFrame(dfGroup).reset_index()
                 temp_df.columns = ['Category', 'Correlation']  # Rename the columns
@@ -503,6 +484,7 @@ class Corrpy:
                 # Print the DataFrame for each category (separate DataFrames for each)
                 print(f"Correlation between {objCol} and {numCol}:")
                 print(temp_df)
+
   def explain(self, func_name):
     docs = {
         "getTotalCorrRelation": (
@@ -537,7 +519,8 @@ class Corrpy:
             "Please Enter 'getGroupInf' also to get detail explanation\n"
             "📘 Terms explained here → https://github.com/Parthdsaiml/corrpy?tab=readme-ov-file#get-to-know-how-each-cateogry-effect-correlation-with-other-numeric-values"
         ),
-         "explainAITC": (
+
+       "explainAITC": (
     "🧠 **explainAITC(df)** is your AI-powered correlation storyteller.\n"
     "It analyzes the entire DataFrame and generates a comprehensive, yet easy-to-understand, \n"
     "narrative about the relationships between your columns. \n"
@@ -549,12 +532,12 @@ class Corrpy:
     "   - Numeric vs. Object (using `getCorrObjDtype`)\n"
     "   - Object vs. Object (using `Nordinal.getObjvsObj`)\n"
     "   - Transitive relations (indirect links)\n"
-    "2. **Insight Generation:** It then feeds this summary to a large language model \n"    
+    "2. **Insight Generation:** It then feeds this summary to a large language model \n"
     "(Llama-4-Maverick-17B-128E-Instruct-FP8 from Together.ai). \n"
     "3. **Storytelling:** The AI crafts a narrative explaining the key findings in a way \n"
     "that's clear, concise, and actionable.\n\n"
     "🚀 **Why use it?**\n"
-    "• **Bridge the technical gap:** Explain complex correlations to non-technical audiences \n"    
+    "• **Bridge the technical gap:** Explain complex correlations to non-technical audiences \n"
     "without jargon or code.\n"
     "• **Save time:** Automate the creation of insightful correlation reports.\n"
     "• **Focus on actions:** The narrative highlights the 'So what?' to drive decision-making.\n\n"
@@ -569,12 +552,12 @@ class Corrpy:
     "⚙️ **How it works:**\n"
     "1. **Shift Calculation:** It first uses the `shift` method to calculate the drift (change in the \n"
     "target feature's predicted mean) when the input feature is shifted by a percentage (`shiftValue`).\n"
-    "2. **AI Interpretation:** This drift information is then sent to Together.ai's language model \n"    
+    "2. **AI Interpretation:** This drift information is then sent to Together.ai's language model \n"
     "(Llama-4-Maverick-17B-128E-Instruct-FP8).\n"
     "3. **Explanation:** The AI provides a clear explanation of the observed drift, telling you if \n"
     "it's significant, increasing, decreasing, or negligible, in plain language.\n\n"
     "🚀 **Why use it?**\n"
-    "• **Gain deeper understanding:** Easily grasp the impact of input changes on your target feature \n"    
+    "• **Gain deeper understanding:** Easily grasp the impact of input changes on your target feature \n"
     "without complex analysis.\n"
     "• **Communicate insights:** Share clear, concise explanations of drift with stakeholders.\n\n"
     "🚨 **Important:**\n"
@@ -602,100 +585,11 @@ class Corrpy:
     " - 'New Mean': Predicted mean of `num2` after shifting `num1`.\n"
     " - 'Difference': Absolute difference between new and previous means."
     ),
-        "checkTransit": (
-            "🔍 **checkTransit(firstFeature, secondFeature, ThirdFeature, df)** finds the partial correlation between three given features.\n"
-            "It's like having a data analyst tell you if there's a direct correlation between two of the features \n"
-            "while controlling for the third feature.\n\n"
-            "⚙️ **How it works:**\n"
-            "1. **Calculate Correlations:** Calculate the correlation between each pair of features.\n"
-            "2. **Partial Correlation:** Calculate the partial correlation between firstFeature and secondFeature \n"
-            "while controlling for ThirdFeature.\n\n"
-            "🚀 **Why use it?**\n"
-            "• **Deeper understanding:** Easily identify the existence of a direct correlation between two features.\n"
-            "• **Filtering out indirect correlations:** Identify correlations that are due to the presence of a third feature.\n\n"
-            "📤 **Output:**\n"
-            "The partial correlation between the first two features while controlling for the third feature.\n"
-        )
+
     }
 
     print(docs.get(func_name, "❓ No explanation found for this method."))
 
-
-  def setApi(self):
-    import os
-
-    # Check if API token is saved already
-    if os.path.exists("api_token.txt"):
-        with open("api_token.txt", "r") as file:
-            apiToken = file.read().strip()
-        print("API Token loaded from file.")
-        return apiToken
-
-    print("Do You Have API Token (y/n)?")
-    flag = input()
-
-    if (flag.lower() == "y"):
-        apiToken = input("Please paste your API token here: ")
-        with open("api_token.txt", "w") as file:
-            file.write(apiToken)
-        print("API Token saved for future use.")
-    else:
-        print("Go to https://www.together.ai/ and generate your token. IT'S FREE!!")
-        print("Then paste it here:")
-        apiToken = input()  # Get the API token from the user
-        with open("api_token.txt", "w") as file:
-            file.write(apiToken)
-        print("API Token saved for future use.")
-
-    return apiToken
-
-  def explainAITC(self, df):
-    nvn = self.getLabled(self.getNumFeatures(df))
-    nvo = self.getCorrObjDtype(df)
-    nordinal = Nordinal()
-    ovo = nordinal.getObjvsObj(df)
-    transit = self.getTransitRelations(df)
-    
-    apiToken = self.setApi()  # Get the API token
-
-    from together import Together
-    msg = f"""
-    🧠 You are a skilled data analyst ai agent.
-    Use the correlation summary below and return an insightful, business-friendly explanation in simple words, ideal for non-technical stakeholders.
-
-    🧾 Here’s the insight summary:
-
-    📊 Numeric vs Numeric: {nvn}
-
-    🔢➡️🔤 Numeric vs Object: {nvo}
-
-    🔤 vs 🔤 Object vs Object: {ovo}
-
-    🔁 Transitive Relations: {transit}
-
-    🎯 Your task:
-
-    Break it down like you're explaining to a curious manager.
-
-    Use Markdown, large paragraphs, bullet points, and emojis.
-    Use Story Telling way of explaining reports. 
-    Keep it under 500 words.
-
-    Make it friendly, clear, and actionable.
-
-    Add a short “So what does this mean for us?” section at the end.
-    
-    """
-
-    client = Together(api_key=apiToken)  # Use the token here
-
-    response = client.chat.completions.create(
-        model="meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
-        messages=[{"role": "user", "content": msg}]
-    )
-
-    ai_output = response.choices[0].message.content
-    print(ai_output)
 
   def setApi(self):
     import os
@@ -761,6 +655,8 @@ class Corrpy:
 
     Add a short “So what does this mean for us?” section at the end.
 
+    Make all compact so that user didnt feel bored get 80% data by just quick view
+
     """
 
     client = Together(api_key=apiToken)  # Use the token here
@@ -777,24 +673,17 @@ class Corrpy:
 
   def getMethods(self):
     print("corrpy.getTotalCorrRelation(df)")
-    print("corrpy.getGroupInf(obj_col, num_col, df)")
+    print("corry.getGroupInf(obj_col, num_col, df)")
     print("corrpy.getAllGroupInf(df)")
     print("corrpy.explainAITC(df)")
     print("corrpy.explain(func_name)")
     print("corrpy.shift(num1, num2, shiftConstant, df)")
     print("corrpy.getMethods()")
-    print("corrpy.setApi()")
-    print("corrpy.explainShift(num1, num2, shiftConstant, df)")
-    print("corrpy.checkTransit(firstFeature, secondFeature, ThirdFeature)")
-    print("corrpy.explainPC(num1, num2, df)")
-    print("corrpy.checkTransitForColumn(column, df)")
-    print("corrpy.explainTransitForcolumn(column, df)")
-
 
 
   def shift(self, num1, num2, shiftValue, df):
     from sklearn.linear_model import LinearRegression
-    import numpy as np  
+    import numpy as np
     model = LinearRegression()
 
     model.fit(df[[num1]], df[num2])
@@ -804,17 +693,17 @@ class Corrpy:
     aboluteDrift = yPredShifted - df[num2]
     percentDrift = aboluteDrift / df[num2] * 100
     prevMean = df[num2].mean()
-    newMean = yPredShifted.mean() 
+    newMean = yPredShifted.mean()
     percentDrift = ((newMean - prevMean) / prevMean) * 100
 
     shiftDF = (percentDrift, prevMean, newMean, newMean - prevMean)
-    
+
     return pd.DataFrame({
     "% Drift": percentDrift,
     "Previous Mean": prevMean,
-    "New Mean": newMean,  
+    "New Mean": newMean,
     "Difference": newMean - prevMean
-      }, index = [0]) 
+      }, index = [0])
 
   def explainShift(self, num1, num2, shiftValue, df):
     from together import Together
@@ -823,7 +712,7 @@ class Corrpy:
     apiToken = self.setApi()  # Get the API token
     msg = f"""
 
-    🧠 **You are a skilled data analyst AI agent.**     
+    🧠 **You are a skilled data analyst AI agent.**
       You have been given a task to analyze the output of a method called `shift`, which is used to estimate how a dependent variable (say, target feature) changes when the independent variable (input feature) is slightly shifted.
 
       📊 Here's the **output** of the `shift` method:
@@ -831,32 +720,32 @@ class Corrpy:
         {shiftedDF}
         ```
 
-        🔧 The `shift` method takes **4 parameters**:  
-        1. `num1` – Name of the independent variable (input feature)  
-        2. `num2` – Name of the dependent variable (target feature)  
-        3. `shiftValue` – The percentage by which we want to shift the independent variable  
+        🔧 The `shift` method takes **4 parameters**:
+        1. `num1` – Name of the independent variable (input feature)
+        2. `num2` – Name of the dependent variable (target feature)
+        3. `shiftValue` – The percentage by which we want to shift the independent variable
         4. `df` – The input DataFrame
 
-    🧪 **How it works:**  
-        - A linear regression model is trained using `num1` to predict `num2`.  
-        - Then, the input feature `num1` is shifted by a percentage (`shiftValue`) to simulate change.  
-        - New predictions are made with this shifted data.  
+    🧪 **How it works:**
+        - A linear regression model is trained using `num1` to predict `num2`.
+        - Then, the input feature `num1` is shifted by a percentage (`shiftValue`) to simulate change.
+        - New predictions are made with this shifted data.
         - The difference between the original and new predictions is analyzed to compute the **drift**.
 
-        📈 **The output** contains 4 columns:  
-        1. **% Drift** – The percentage change in the predicted mean after shift  
-        2. **Previous Mean** – The mean of the original target variable (`num2`)  
-        3. **New Mean** – The mean of the predicted target values after shifting input  
+        📈 **The output** contains 4 columns:
+        1. **% Drift** – The percentage change in the predicted mean after shift
+        2. **Previous Mean** – The mean of the original target variable (`num2`)
+        3. **New Mean** – The mean of the predicted target values after shifting input
         4. **Difference** – The absolute change between new and previous means
 
-        🎯 **Your Task:**  
-        - Analyze the `shiftedDF` output.  
-        - Interpret what the values say about how the target feature reacts to a change in the input feature.  
+        🎯 **Your Task:**
+        - Analyze the `shiftedDF` output.
+        - Interpret what the values say about how the target feature reacts to a change in the input feature.
         - Help explain if the drift is significant, increasing, decreasing, or negligible.
           dont show any code in output just explain the output in storymode
 
           make output compact so that user dosen't feel bore
-          Add emojies where u can 
+          Add emojies where u can
 
           """
 
@@ -873,22 +762,23 @@ class Corrpy:
   def checkTransit(self, firstFeature, secondFeature, ThirdFeature, df):
     def returnList(firstFeature, secondFeature, ThirdFeature):
       corrList = []
-      corrList.append(df[firstFeature].corr(df[secondFeature])) 
-      corrList.append(df[firstFeature].corr(df[ThirdFeature]))  
-      corrList.append(df[secondFeature].corr(df[ThirdFeature])) 
+      corrList.append(df[firstFeature].corr(df[secondFeature]))
+      corrList.append(df[firstFeature].corr(df[ThirdFeature]))
+      corrList.append(df[secondFeature].corr(df[ThirdFeature]))
+      return corrList
       return corrList
 
     def getPartialCorrelation(corrList):
       r_XY = corrList[0]
       r_XZ = corrList[1]
-      r_YZ = corrList[2]      
-    
+      r_YZ = corrList[2]
+
       numerator = r_XY - (r_XZ * r_YZ)
       denominator = ((1 - r_XZ**2) * (1 - r_YZ**2))**0.5
-    
-      return numerator / denominator if denominator != 0 else 0
 
-    return getPartialCorrelation(returnList(firstFeature, secondFeature, ThirdFeature))  
+      return round(numerator / denominator if denominator != 0 else 0, 2)
+
+    return getPartialCorrelation(returnList(firstFeature, secondFeature, ThirdFeature))
 
   def explainPartialCorrelation(self, firstFeature, secondFeature, ThirdFeature, df):
     from together import Together
@@ -915,7 +805,12 @@ and show the report at last directly for proof without any md format
 
     ai_output = response.choices[0].message.content
     print(ai_output)
+
+
+
+
   def checkTransitForColumn(self, feature, df):
+
     numDf = df.select_dtypes(include=[np.number]).copy()
 
     transitList = []
@@ -977,8 +872,184 @@ and add sarcasm where u can
     print(ai_output)
 
 
+  def returnPearsonTest(self, dfPairs, dfDATA):
+    def formula(num1, num2, df):
+      return round(df[num1].corr(df[num2]), 2)
 
+    perasonValues = []
+    for _, row in dfPairs.iterrows():
+      col1 = row['Feature A']
+      col2 = row['Feature B']
+      perasonValues.append(formula(col1, col2, dfDATA))
+
+    dfPairs['Pearson'] = perasonValues
+    return dfPairs
+
+  def returnSpearmanTest(self, dfPairs, dfDATA):
+    def formula(num1, num2, df):
+        rank1 = df[num1].rank()
+        rank2 = df[num2].rank()
+        differenceSquaredSum = ((rank1 - rank2) ** 2).sum()
+        n = len(df)
+        return round(1 - (6 * differenceSquaredSum) / (n * (n**2 - 1)), 2)
+
+    spearmanValues = []
+    for _, row in dfPairs.iterrows():
+      col1 = row['Feature A']
+      col2 = row['Feature B']
+      spearmanValues.append(formula(col1, col2, dfDATA))
+
+    dfPairs['Spearman'] = spearmanValues
+    return dfPairs
+
+
+  def addTestsNvN(self, df, feature = "Correlation"):
+    if (feature == "pearson"):
+      feature = "Correlation"
+    feature = feature.capitalize()
+
+    dfPairs = self.getNvN(df, feature)  # Calling getNvN to potentially create the 'Spearman' column first
     
+    # Create the needed columns ('Pearson' and 'Spearman') after getNvN
+    dfPairs = self.returnPearsonTest(dfPairs, df)
+    dfPairs = self.returnSpearmanTest(dfPairs, df)
+    dfPairs = self.returnDistance(dfPairs, df)
+
+    dfPairs = self.addInterpretationsBasedOnFeature(dfPairs, feature)
+    if feature == "Pearson" or feature == "Correlation":
+      dfPairs = dfPairs.sort_values(by='Pearson', ascending=False)
+    elif feature == "Spearman":
+      dfPairs = dfPairs.sort_values(by='Spearman', ascending=False)    
+    elif feature == "Distance":
+      dfPairs = dfPairs.sort_values(by='Distance', ascending=False)
+    return dfPairs
+
+  def getNvN(self, df, feature = "Correlation"):
+    feature = feature.capitalize()
+    if feature == "Spearman":
+        # Perform calculations for Spearman correlation here and add to df
+        dfNum = self.getNumFeatures(df).copy()
+        corrs = []
+        for colA in dfNum.columns:
+            for colB in dfNum.columns:
+                if colA != colB:
+                    corrValue = dfNum[colA].corr(dfNum[colB], method="spearman")
+                    corrs.append([colA, colB, corrValue])
+        df = pd.DataFrame(corrs, columns=["Feature A", "Feature B", "Spearman"])  
+    elif (feature == "Distance"):
+        dfNum = self.getNumFeatures(df).copy()
+        corrs = []
+        for colA in dfNum.columns:
+            for colB in dfNum.columns:
+                if colA != colB:
+                    corrValue = self.returnDistanceCorrelation(colA, colB, dfNum)
+                    corrs.append([colA, colB, corrValue])
+        df = pd.DataFrame(corrs, columns=["Feature A", "Feature B", "Distance"])
+
+    else:
+        df = self.generateInterpreations(self.getLabled(self.getNumFeatures(df).copy(), feature=feature)) 
+    return df
+  
+  def addInterpretationsBasedOnFeature(self, df, feature):
+    df = df.copy()
+    df = self.generateInterpreations(df, feature)
+    return df
+
+  def generateInterpreations(self, df, correlation = "Correlation"):
+    def generateInterpreationsForFeatureAB(featureA, featureB, correlation):
+      absCorr = abs(correlation)
+      direction = '↑' if correlation > 0 else '↓'
+      if (correlation > 0 and correlation < 0.7):
+        strengthSymbol = "↑"
+      elif (correlation < 0 and correlation > -0.7):
+        strengthSymbol = "↓"
+      elif (correlation > 0.7 and correlation < 0.9):
+        strengthSymbol = "↑↑"
+      elif (correlation > -0.9 and correlation < -0.7):
+        strengthSymbol = "↓↓"
+      elif (correlation > 0.9):
+        strengthSymbol = "↑↑↑"
+      elif (correlation < -0.9):
+        strengthSymbol = "↓↓↓"
+      else:
+        strengthSymbol = "-"
+
+      if (absCorr >= 0.8):
+        insight = f"{strengthSymbol} Strong: Direct Driver"
+      elif (0.6 <= absCorr < 0.8):
+        insight = f"{strengthSymbol} Key Factor but not only Driver"
+      elif (0.4 <= absCorr < 0.6):
+        insight = f"{direction} Moderate: Linked Trend"
+      elif (0.2 <= absCorr < 0.4):
+        insight = f"{direction} Weak: Contextual"
+      else:
+        insight = f"No linkage"
+      return insight
+
+    def generate(row):
+      featureA = row["Feature A"]
+      featureB = row["Feature B"]
+      corr = row[correlation]
+
+      return generateInterpreationsForFeatureAB(featureA, featureB, corr)
+    df["Interpretation"] = df.apply(generate, axis = 1)
+    self.addTrends(df, Feature = correlation)
+    return df
+
+  def returnDistance(self, dfPairs, dfDATA):
+    def formula(num1, num2, df):
+      return self.returnDistanceCorrelation(num1, num2, df)
+    
+    distanceValues = []
+    for _, row in dfPairs.iterrows():
+      col1 = row['Feature A']
+      col2 = row['Feature B']
+      distanceValues.append(formula(col1, col2, dfDATA))
+
+    dfPairs['Distance'] = distanceValues
+    return dfPairs
+
+  def returnDistanceCorrelation(self, num1, num2, df):
+    firstValues = df[num1].values
+    secondValues = df[num2].values
+    meanX = df[num1].mean()
+    meanY = df[num2].mean()
+
+    XCol = firstValues.reshape(-1, 1)
+    YCol = secondValues.reshape(-1, 1)
+
+    distanceX = np.abs(XCol - XCol.T)
+    distanceY = np.abs(YCol - YCol.T)
+
+    mean_row_X = distanceX.mean(axis=1, keepdims=True)
+    mean_col_X = distanceX.mean(axis=0, keepdims=True)
+    mean_all_X = distanceX.mean()
+
+    # Row-wise and column-wise means for Y
+    mean_row_Y = distanceY.mean(axis=1, keepdims=True)
+    mean_col_Y = distanceY.mean(axis=0, keepdims=True)
+    mean_all_Y = distanceY.mean()
+
+    # Centered distance matrices
+    centered_X = distanceX - mean_row_X - mean_col_X + mean_all_X
+    centered_Y = distanceY - mean_row_Y - mean_col_Y + mean_all_Y
+
+    # Step 3: Calculate the distance covariance
+    n = len(firstValues)
+    dcov = np.sum(centered_X * centered_Y) / (n * n)
+
+    # Step 4: Calculate the distance variances
+    dvar_X = np.sum(centered_X * centered_X) / (n * n)
+    dvar_Y = np.sum(centered_Y * centered_Y) / (n * n)
+
+    # Step 5: Calculate the distance correlation
+    # Step 5: Calculate the distance correlation
+    epsilon = 1e-10 # Small constant to prevent division by zero
+    if dvar_X * dvar_Y == 0:
+        return 0
+    else:
+        return round(dcov / np.sqrt((dvar_X + epsilon) * (dvar_Y + epsilon)), 2)
+
 
 
 

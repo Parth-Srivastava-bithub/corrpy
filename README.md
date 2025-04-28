@@ -31,7 +31,9 @@ corrpy = Corrpy()
 ### All Methods you can use 
 
 1. `getMethods()`: Returns a list of all available methods in Corrpy.
-2. `getTotalCorrRelation(df)`: Pass a pandas DataFrame to get correlation analysis across all columns.
+
+2. `getTotalCorrRelation(df, feature = None)`: Pass a pandas DataFrame to get correlation analysis across all columns and get trends, interpretations and score with respect to feature u added in parameter.
+
 3. `getGroupInf(objColumn, numColumn, df)`: Compute the correlation between the given object column and the given numeric column.
 4. `getAllGroupInf(df)`: Compute the correlation between all object columns and all numeric columns.
 5. `setApi()`: Securely handles your [Together.ai](https://www.together.ai/) API token.
