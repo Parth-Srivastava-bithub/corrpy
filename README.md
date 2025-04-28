@@ -1,18 +1,20 @@
-# 🧠 CorrPY – Correlation with Ease
+# 🧠 CorrPY – Correlation Made Easy
 
 ![PyPI version](https://img.shields.io/pypi/v/corrpy)
 ![Downloads](https://img.shields.io/pypi/dm/corrpy)
 ![License](https://img.shields.io/pypi/l/corrpy)
 ![Python](https://img.shields.io/pypi/pyversions/corrpy)
-![Maintenance](https://img.shields.io/maintenance/yes/2025)
-![Stars](https://img.shields.io/github/stars/parthdsaiml/corrpy?style=social)
-
-
-**CorrPY** is a lightweight Python library that simplifies correlation analysis with intuitive insights and visual patterns. It's built for data scientists who want quick, meaningful interpretation instead of just numbers.
 
 ---
 
-## 🚀 Installation
+**CorrPY** is your lightweight buddy for fast, smart correlation analysis.  
+Forget just numbers — CorrPY tells you **what they *mean***. 📊✨
+
+Built for data scientists who want **insights**, not just values.
+
+---
+
+## 🚀 Install
 
 ```bash
 pip install corrpy
@@ -20,13 +22,30 @@ pip install corrpy
 
 ---
 
-## 📦 Import and Initialize
+## 📦 Quickstart
 
 ```python
 from corrpy import Corrpy
 
 corrpy = Corrpy()
+corrpy.getTotalCorrRelation(df)
 ```
+
+✅ Analyze correlation across features  
+✅ Get trends + easy-to-read interpretations  
+✅ Go deeper with AI explanations (optional)
+
+---
+
+## 🔥 Key Features
+
+- **Numerical vs Numerical** — Classic correlations + strength.
+- **Object vs Numerical** — Category impacts, clear trends.
+- **Object vs Object** — Categorical association (Chi2).
+- **Transitive Trap Alerts** — Detect hidden indirect links. 🚨
+- **AI-Generated Insights** — Explain data like a boss 🧠📜
+
+---
 
 ### All Methods you can use 
 
@@ -50,220 +69,13 @@ corrpy = Corrpy()
 
 ---
 
-## 🧪 Quick Usage
 
+## 🧠 Example Insights
 
-```python
-corrpy.getMethods()
-```
+> *"Age and Fare have a moderate positive correlation.  
+Pclass has a strong inverse relation with Fare."*
 
-> Returns a list of all available methods in Corrpy.
-
-
-
-```python
-corrpy.getTotalCorrRelation(df)
-```
-
-> Pass a pandas DataFrame to get correlation analysis across all columns.
-
----
-
-
-## Get to know how each cateogry effect Correlation with other numeric values
-
-```python
-corrpy.getGroupInf(objColumn, numColumn, df)
-```
-
-or 
-
-```python
-corrpy.getAllGroupInf(df)
-```
-
-
-`getGroupInf` function takes an object column, a numeric column, and a DataFrame as inputs. It will compute the correlation between the given object column and the given numeric column.
-
-`getAllGroupInf` function takes a DataFrame as an input. It will compute the correlation between all object columns and all numeric columns.
-
-![alt text](image-1.png)
----
-
-## Get AI Insights
-
-
-### 🔐 `setApi()`
-Securely handles your [Together.ai](https://www.together.ai/) API token:
-- Prompts you once for your API token.
-- Saves it locally in `api_token.txt`.
-- Automatically loads it in future runs.
-- You don’t need to paste it every time – just plug & play. 🛠️
-
-
----
-
-### 📊 `explainAITC(df)`
-Let AI become your personal analyst 🧠:
-- Takes your correlation insights and turns them into **easy-to-read, friendly reports**.
-- Explains **Numeric vs Numeric**, **Numeric vs Object**, **Object vs Object**, and even **Transitive Relations**.
-- Ideal for **non-technical stakeholders**, managers, or presentations.
-- Uses storytelling, emojis, bullets, and markdown for impact.
-
-📝 **Example Use Case:**  
-Get a summary that reads like a newsletter:  
-_"Sales and Ad Spend are strongly related. But interestingly, Region affects Product Category preferences, forming a hidden dependency."_
-
-![alt text](image-5.png)
-
----
-
-### 🔁 `shift(num1, num2, shiftValue, df)`
-Test how your dependent variable reacts to small changes in an input variable:
-- Trains a Linear Regression model on `num1 ➝ num2`.
-- Simulates a percentage change (`shiftValue`) in `num1`.
-- Predicts new outcomes and compares the drift in mean of `num2`.
-
-📌 **Returns:**  
-- `% Drift` → How much the outcome changes in percentage.
-- `Previous Mean` → Mean of actual target.
-- `New Mean` → Mean of shifted prediction.
-- `Difference` → Absolute change.
-
-Great for **“what if”** analysis and understanding sensitivity of models.
-
-![alt text](image-4.png)
-
----
-
-### 🧠 `explainShift(num1, num2, shiftValue, df)`
-An AI analyst explains the output of `shift()` like you're in a meeting with your CEO:
-- Interprets how impactful the shift is.
-- Uses storytelling, avoids jargon.
-- Suggests whether the shift is significant or negligible.
-- Super engaging and compact 💬✨
-
-🎯 **Perfect For:**  
-- Presenting shift results to non-technical folks  
-- Feature sensitivity explanation  
-- Strategy discussions or model audits
-
-![alt text](image-3.png)
-
-### ⚠️ `checkTransit(firstFeature, secondFeature, ThirdFeature)`
-
-`checkTransit` method takes three feature names as inputs and checks if there is a **transitive relation** between them. It returns a boolean to indicate whether the transitive relation exists or not.
-
-The method first calculates the pairwise correlation between the three features using the `corr` method. It then calculates the partial correlation between the first feature and second feature while controlling for the third feature. The partial correlation is calculated using the formula for partial correlation, which involves the three pairwise correlations. If the partial correlation is not zero, then a transitive relation exists between the three features.
-
-It's a super powerful method that can reveal hidden relationships between features, which can be game-changing for your models and insights. It's like having a superpower in your analysis toolkit! 💪
-
-
-
-
-
-## 🧩 Features
-
-- 📊 **Numerical vs Numerical** → Pearson correlation with strength interpretation  
-- 🧠 **Object vs Numerical** → Association analysis (point biserial or ANOVA based)  
-- 🔁 **Object vs Object** → Chi-Square based categorical association  
-- ⌚ **Time vs Other** → Time-based trend and correlation detection  
-- ⚠️ **Transitive Correlation Alert** → Detects misleading indirect relations  
-
----
-
-## 📈 Example Output
-
-![image](https://github.com/user-attachments/assets/2fa9140e-5ae1-4f18-a030-0dcb74e44ea9)
-
-
----
-
-# Explanation of Terms in Correlation Analysis
-
-This document explains the key terms and terminology used in the correlation analysis output. Understanding these terms will help you interpret the relationship between various features in the dataset.
-
----
-
-## Numerical vs Numerical Relation
-- **Feature A / Feature B**: These represent two numerical columns in the dataset that are being compared for correlation.
-- **Correlation Strength**: The value indicates how strongly two numerical features are related. Ranges from -1 to 1:
-  - **Positive values** (closer to 1) indicate a strong positive relationship.
-  - **Negative values** (closer to -1) indicate a strong negative relationship.
-  - **Low/No linkage** indicates little to no correlation.
-- **Interpretation**: A brief statement explaining the strength and nature of the correlation.
-- **Trend**: A graphical representation of the correlation trend, with symbols:
-  - ▱▱▱▱▱ = No significant trend
-  - ▰▰▱▱▱ = Positive trend with moderate strength.
-    
-
----
-
-## Object vs Numerical Relation
-- **Object Column**: A categorical or non-numeric feature (e.g., string, category).
-- **Numerical Column**: A numerical feature (e.g., integer, float).
-- **Correlation**: The degree of association between an object feature and a numerical feature. It ranges from -1 to 1:
-  - **↑** indicates a positive correlation.
-  - **↓** indicates a negative correlation.
-- **Interpretation**: The explanation of the relationship:
-  - **Weak: Contextual** means a weak, context-dependent correlation.
-  - **Moderate: Linked Trend** means a moderate correlation showing a clear relationship.
-- **Trend**: The visual representation of the correlation trend:
-  - ▰▰▱▱▱ =  Trend with moderate strength *For Object Vs Numerical Relation Trends just shows the strength without any direction*.
-
----
-
-## Object vs Object Relation
-- **Feature A / Feature B**: Both are categorical (non-numerical) features.
-- **Chi2**: The Chi-square statistic measures the difference between expected and observed frequencies of categorical data.
-- **P-Value**: The probability of obtaining a result as extreme as the one observed, assuming the null hypothesis is true. A high p-value (> 0.05) typically means there's no significant relationship between the features.
-
----
-
-## Time vs Numerical Relation
-- **DateTime Column**: A feature representing time or dates.
-- **Numerical Column**: A numerical feature being compared with the datetime column.
-- **Correlation Score**: The strength of the relationship between time and numerical features. A negative score indicates no linkage.
-- **Interpretation**: The relationship between time and numerical features, with **No linkage** indicating no significant correlation.
-- **Trend**: The trend representation:
-  - ▱▱▱▱▱ = No significant trend.
-
----
-
-## Time vs Object Relation
-- **DateTime Column**: A feature representing time or dates.
-- **Object Column**: A categorical feature.
-- **Correlation Score**: Indicates the relationship between time and categorical features.
-- **Interpretation**: Explains the nature of the correlation, such as **Weak: Contextual** for weak, context-dependent correlation or **No linkage** for no significant correlation.
-- **Trend**: Visual representation of the correlation trend, with arrows indicating the strength and direction.
-
----
-
-## Transitive Relation Alert
-- **Feature A / Feature B / Feature C**: A scenario where the correlation between Feature A and Feature B might be influenced by Feature C. This suggests a transitive relationship where indirect connections between features need to be checked.
-
----
-
-### Conclusion
-The correlation and relationships presented in this analysis help you understand how different features in your dataset are connected. Correlations can vary from weak to strong, positive or negative, and these trends provide valuable insights into how to approach data analysis and modeling.
-
-
-## 💡 Why CorrPY?
-
-- Gives **interpretable insights**, not just raw correlation values  
-- Detects **transitive traps** often missed in basic EDA  
-- Ideal for **data pre-analysis** before modeling  
-
----
-
-## 📚 Dependencies
-
-- pandas  
-- numpy  
-- scipy  
-- seaborn  
-- IPython  
-- together
+✨ Plus visual trends, interpretation tags, and more!
 
 ---
 
@@ -280,5 +92,25 @@ BSD 3-Clause License
 
 ---
 
+# ⚡ TL;DR
 
+| # | What CorrPY Gives You |
+|:-|:--|
+| 🚀 | Quick, meaningful correlation analysis |
+| 🤖 | AI-driven explanations |
+| 🧩 | Find hidden patterns |
+| 🔥 | Detect transitive traps |
+| 🎯 | Ideal for both beginners and pros |
 
+---
+
+# 📢 FINAL NOTE:
+
+> **CorrPY isn't just another EDA tool...  
+> It's your data's best storyteller. 📚🚀**
+
+---
+
+# 🧹 How to use:
+- README for Quick Start 📑
+- Full GUIDE.md for Deep Dive 📚
