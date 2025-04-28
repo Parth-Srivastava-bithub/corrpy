@@ -46,6 +46,10 @@ corrpy = Corrpy()
 12. `explainTransitForcolumn(column, df, mode = "MOOD")`: An AI analyst explains the output of `checkTransitForColumn()` like you're in a meeting with your CEO.
 ---
 
+# You can write how ai should answer in `mode` Parameters
+
+---
+
 ## 🧪 Quick Usage
 
 
