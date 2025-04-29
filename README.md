@@ -78,8 +78,10 @@ corrpy.getTotalCorrRelation(df)
 - Elon Musk  
 - Angry Professor  
 - Chandler Bing  
-- AI Guru  
-- Startup Bro  
+- Stand-up comedian
+- Oppenheimer
+- Mahatma gandhi
+
 
 (*More being added weekly – you can easily expand the template!*)
 

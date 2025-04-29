@@ -597,7 +597,6 @@ No use of md style just plain paragraphs
   
   def shift(self, num1, num2, shiftValue, df):
     from sklearn.linear_model import LinearRegression
-    import numpy as np
     model = LinearRegression()
 
     # Drop rows with missing values in num1 and num2 columns before fitting
@@ -613,8 +612,6 @@ No use of md style just plain paragraphs
     newMean = yPredShifted.mean()
     percentDrift = ((newMean - prevMean) / prevMean) * 100
 
-    shiftDF = (percentDrift, prevMean, newMean, newMean - prevMean)
-
     return pd.DataFrame({
     "% Drift": percentDrift,
     "Previous Mean": prevMean,
@@ -622,7 +619,7 @@ No use of md style just plain paragraphs
     "Difference": newMean - prevMean
       }, index = [0])
 
-  def explainShift(self, num1, num2, shiftValue, df, character = "Data analyst", mode = "Sarcastic"):
+  def explainShift(self, num1, num2, shiftValue, df, character = "Data analyst", mode = "Sarcastic", prompt = "Null"):
     from together import Together
 
     shiftedDF = self.shift(num1, num2, shiftValue, df)
@@ -639,8 +636,9 @@ No use of md style just plain paragraphs
         return
     character = character.capitalize()
     mode = mode.capitalize()
-    
-    msg = f"""
+    msg = ""
+    if (prompt == "Null"):
+      msg = f"""
 
     🧠 **You are a skilled data analyst AI agent.**
       You have been given a task to explain the output of a method called `shift`, which is used to estimate how a dependent variable (say, target feature) changes when the independent variable (input feature) is slightly shifted.
@@ -678,6 +676,46 @@ No use of md style just plain paragraphs
           Add emojies where u can
 
           """
+    else:
+      msg = f"""
+
+    🧠 **You are a skilled data analyst AI agent.**
+      You have been given a task to explain the output of a method called `shift`, which is used to estimate how a dependent variable (say, target feature) changes when the independent variable (input feature) is slightly shifted.
+
+      📊 Here's the **output** of the `shift` method:
+        ```
+        {shiftedDF}
+        ```
+        Explain in {mode} way
+        🔧 The `shift` method takes **4 parameters**:
+        1. `num1` – Name of the independent variable (input feature)
+        2. `num2` – Name of the dependent variable (target feature)
+        3. `shiftValue` – The percentage by which we want to shift the independent variable
+        4. `df` – The input DataFrame
+
+    🧪 **How it works:**
+        - A linear regression model is trained using `num1` to predict `num2`.
+        - Then, the input feature `num1` is shifted by a percentage (`shiftValue`) to simulate change.
+        - New predictions are made with this shifted data.
+        - The difference between the original and new predictions is analyzed to compute the **drift**.
+
+        📈 **The output** contains 4 columns:
+        1. **% Drift** – The percentage change in the predicted mean after shift
+        2. **Previous Mean** – The mean of the original target variable (`num2`)
+        3. **New Mean** – The mean of the predicted target values after shifting input
+        4. **Difference** – The absolute change between new and previous means
+
+        🎯 **Your Task:**
+        - Analyze the `shiftedDF` output.
+        - Interpret what the values say about how the target feature reacts to a change in the input feature.
+        - Help explain if the drift is significant, increasing, decreasing, or negligible.
+          dont show any code in output just explain the output in storymode
+
+          make output compact so that user dosen't feel bore
+          Add emojies where u can
+
+          """
+
 
     client = Together(api_key=apiToken)  # Use the token here
 
@@ -695,7 +733,6 @@ No use of md style just plain paragraphs
       corrList.append(df[firstFeature].corr(df[secondFeature]))
       corrList.append(df[firstFeature].corr(df[ThirdFeature]))
       corrList.append(df[secondFeature].corr(df[ThirdFeature]))
-      return corrList
       return corrList
 
     def getPartialCorrelation(corrList):
@@ -950,7 +987,7 @@ characterTemplate = {
         "Your tone = rage meets reason.\n"
         "You hate Excel but love shouting 'WHY DON'T YOU UNDERSTAND?!'"
     ),
-    "J. robert oppenheimer": (
+    "Oppenheimer": (
         "You are Oppenheimer — visionary, serious, and haunted by implications. 💣\n"
         "You explain analysis with historical weight and precision.\n"
         "Your tone is solemn, scientific, and philosophical.\n"
