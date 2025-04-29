@@ -73,9 +73,14 @@ class Nordinal:
       for featureA in dfObj.columns:
         for featureB in dfObj.columns:
           if (featureA != featureB):
-            contingency = pd.crosstab(df[featureA], df[featureB])
-            chi2, p, _, _ = chi2_contingency(contingency)
-            objVsObjDF.append([featureA, featureB, round(chi2, 2), round(p, 2)])
+            # Check if both columns have at least one common value
+            if any(x in df[featureB].unique() for x in df[featureA].unique()):
+              contingency = pd.crosstab(df[featureA], df[featureB])
+              chi2, p, _, _ = chi2_contingency(contingency)
+              objVsObjDF.append([featureA, featureB, round(chi2, 2), round(p, 2)])
+            else:
+              # Handle the case where there are no common values, e.g., print a message
+              continue
       objVsObjDF = pd.DataFrame(objVsObjDF, columns = ["Feature A", "Feature B", "Chi2", "P-Value"])
       return objVsObjDF
 
@@ -300,14 +305,15 @@ class Corrpy:
 
   
 
-  def getTotalCorrRelation(self, df, feature = "Correlation", short = False,):
+  def getTotalCorrRelation(self, df,features = ["Correlation"], feature = "Correlation", short = False):
     from IPython.display import display, HTML
 
     display(HTML("<h3 style='color: teal;'>🔢 Numerical vs Numerical Relation</h3>"))
     display(HTML(f"<p style='color: lightgreen;'>Sorted Trends and Interpretations are with respect to feature {feature}</p>"))
-    
-    dfNum = self.addTestsNvN(df, feature)
-    dfNum = dfNum.rename(columns = {"Feature A": "Numerical Column A", "Feature B": "Numerical Column B", "Correlation": "Correlation Score"})
+
+    dfNum = self.returnNvN(df, features, targetFeature=feature)
+    dfNum = dfNum.rename(columns = {"Feature A": "Numerical Column A", "Feature B": "Numerical Column B"})
+
     if (short):
       print(dfNum.head())
     else:
@@ -890,94 +896,8 @@ and add sarcasm where u can
     ai_output = response.choices[0].message.content
     print(ai_output)
 
-
-  def returnPearsonTest(self, dfPairs, dfDATA):
-    def formula(num1, num2, df):
-      return round(df[num1].corr(df[num2]), 2)
-
-    perasonValues = []
-    for _, row in dfPairs.iterrows():
-      col1 = row['Feature A']
-      col2 = row['Feature B']
-      perasonValues.append(formula(col1, col2, dfDATA))
-
-    dfPairs['Pearson'] = perasonValues
-    return dfPairs
-
-  def returnSpearmanTest(self, dfPairs, dfDATA):
-    def formula(num1, num2, df):
-        rank1 = df[num1].rank()
-        rank2 = df[num2].rank()
-        differenceSquaredSum = ((rank1 - rank2) ** 2).sum()
-        n = len(df)
-        return round(1 - (6 * differenceSquaredSum) / (n * (n**2 - 1)), 2)
-
-    spearmanValues = []
-    for _, row in dfPairs.iterrows():
-      col1 = row['Feature A']
-      col2 = row['Feature B']
-      spearmanValues.append(formula(col1, col2, dfDATA))
-
-    dfPairs['Spearman'] = spearmanValues
-    return dfPairs
-
-
-  def addTestsNvN(self, df, feature = "Correlation"):
-    if (feature == "pearson"):
-      feature = "Correlation"
-    feature = feature.capitalize()
-
-    dfPairs = self.getNvN(df, feature)  # Calling getNvN to potentially create the 'Spearman' column first
-    
-    # Create the needed columns ('Pearson' and 'Spearman') after getNvN
-    dfPairs = self.returnPearsonTest(dfPairs, df)
-    dfPairs = self.returnSpearmanTest(dfPairs, df)
-    dfPairs = self.returnDistance(dfPairs, df)
-
-    dfPairs = self.addInterpretationsBasedOnFeature(dfPairs, feature)
-    if feature == "Pearson" or feature == "Correlation":
-      dfPairs = dfPairs.sort_values(by='Pearson', ascending=False)
-    elif feature == "Spearman":
-      dfPairs = dfPairs.sort_values(by='Spearman', ascending=False)    
-    elif feature == "Distance":
-      dfPairs = dfPairs.sort_values(by='Distance', ascending=False)
-    return dfPairs
-
-  def getNvN(self, df, feature = "Correlation"):
-    feature = feature.capitalize()
-    if feature == "Spearman":
-        # Perform calculations for Spearman correlation here and add to df
-        dfNum = self.getNumFeatures(df).copy()
-        corrs = []
-        for colA in dfNum.columns:
-            for colB in dfNum.columns:
-                if colA != colB:
-                    corrValue = dfNum[colA].corr(dfNum[colB], method="spearman")
-                    corrs.append([colA, colB, corrValue])
-        df = pd.DataFrame(corrs, columns=["Feature A", "Feature B", "Spearman"])  
-    elif (feature == "Distance"):
-        dfNum = self.getNumFeatures(df).copy()
-        corrs = []
-        for colA in dfNum.columns:
-            for colB in dfNum.columns:
-                if colA != colB:
-                    corrValue = self.returnDistanceCorrelation(colA, colB, dfNum)
-                    corrs.append([colA, colB, corrValue])
-        df = pd.DataFrame(corrs, columns=["Feature A", "Feature B", "Distance"])
-
-    else:
-        dfNum = self.getNumFeatures(df).copy()
-        corrs = []
-        for colA in dfNum.columns:
-            for colB in dfNum.columns:
-                if colA != colB:
-                    corrValue = dfNum[colA].corr(dfNum[colB])
-                    corrs.append([colA, colB, corrValue])
-        df = pd.DataFrame(corrs, columns=["Feature A", "Feature B", "Correlation"]) 
-    return df
   
   def addInterpretationsBasedOnFeature(self, df, feature):
-    df = df.copy()
     df = self.generateInterpreations(df, feature)
     return df
 
@@ -1022,62 +942,37 @@ and add sarcasm where u can
     self.addTrends(df, Feature = correlation)
     return df
 
-  def returnDistance(self, dfPairs, dfDATA):
-    def formula(num1, num2, df):
-      return self.returnDistanceCorrelation(num1, num2, df)
+
+  def returnNvN(self, df, features=["Correlation"], targetFeature = "Correlation"):
+    from scipy.spatial.distance import pdist, squareform
+    if (targetFeature == "pearson"):
+      targetFeature = "Correlation"
+
+    dfNum = self.getNumFeatures(df).copy()
+    features = [f.capitalize() for f in features]
+
+    result = {}
+    if "Spearman" in features or "Correlation" in features:
+        result["Spearman"] = dfNum.corr(method="spearman")
+    if "Pearson" in features or "Correlation" in features:
+        result["Correlation"] = dfNum.corr(method="pearson")
+    if "Distance" in features or "Correlation" in features:
+        dist_matrix = squareform(pdist(dfNum.T, metric='euclidean'))
+        result["Distance"] = pd.DataFrame(dist_matrix, index=dfNum.columns, columns=dfNum.columns)
+
+    corrs = []
+    cols = dfNum.columns
+    for i in range(len(cols)):
+        for j in range(i + 1, len(cols)):
+            row = {"Feature A": cols[i], "Feature B": cols[j]}
+            for key, matrix in result.items():
+                row[key] = matrix.iloc[i, j]
+            corrs.append(row)
+    targetFeature = targetFeature.capitalize()
+    if (targetFeature == "Distance"):
+      return pd.DataFrame(corrs)
+    resultDf = pd.DataFrame(corrs)
+    resultDf = self.addInterpretationsBasedOnFeature(resultDf, targetFeature)
+    resultDf = resultDf.sort_values(by=targetFeature, ascending=False)
     
-    distanceValues = []
-    for _, row in dfPairs.iterrows():
-      col1 = row['Feature A']
-      col2 = row['Feature B']
-      distanceValues.append(formula(col1, col2, dfDATA))
-
-    dfPairs['Distance'] = distanceValues
-    return dfPairs
-
-  def returnDistanceCorrelation(self, num1, num2, df):
-    firstValues = df[num1].values
-    secondValues = df[num2].values
-    meanX = df[num1].mean()
-    meanY = df[num2].mean()
-
-    XCol = firstValues.reshape(-1, 1)
-    YCol = secondValues.reshape(-1, 1)
-
-    distanceX = np.abs(XCol - XCol.T)
-    distanceY = np.abs(YCol - YCol.T)
-
-    mean_row_X = distanceX.mean(axis=1, keepdims=True)
-    mean_col_X = distanceX.mean(axis=0, keepdims=True)
-    mean_all_X = distanceX.mean()
-
-    # Row-wise and column-wise means for Y
-    mean_row_Y = distanceY.mean(axis=1, keepdims=True)
-    mean_col_Y = distanceY.mean(axis=0, keepdims=True)
-    mean_all_Y = distanceY.mean()
-
-    # Centered distance matrices
-    centered_X = distanceX - mean_row_X - mean_col_X + mean_all_X
-    centered_Y = distanceY - mean_row_Y - mean_col_Y + mean_all_Y
-
-    # Step 3: Calculate the distance covariance
-    n = len(firstValues)
-    dcov = np.sum(centered_X * centered_Y) / (n * n)
-
-    # Step 4: Calculate the distance variances
-    dvar_X = np.sum(centered_X * centered_X) / (n * n)
-    dvar_Y = np.sum(centered_Y * centered_Y) / (n * n)
-
-    # Step 5: Calculate the distance correlation
-    # Step 5: Calculate the distance correlation
-    epsilon = 1e-10 # Small constant to prevent division by zero
-    if dvar_X * dvar_Y == 0:
-        return 0
-    else:
-        return round(dcov / np.sqrt((dvar_X + epsilon) * (dvar_Y + epsilon)), 2)
-
-
-
-
-
-
+    return resultDf
