@@ -51,7 +51,7 @@ corrpy.getTotalCorrRelation(df)
 
 1. `getMethods()`: Returns a list of all available methods in Corrpy.
 
-2. `getTotalCorrRelation(df, feature = None)`: Pass a pandas DataFrame to get correlation analysis across all columns and get trends, interpretations and score with respect to feature u added in parameter.
+2. `getTotalCorrRelation(df, features = ["Correlation", "Pearson", "Distance"], feature = "Correlation", short = False)`: Pass a pandas DataFrame to get correlation analysis across all columns and get trends, interpretations and score with respect to feature u added in parameter.
 
 3. `getGroupInf(objColumn, numColumn, df)`: Compute the correlation between the given object column and the given numeric column.
 4. `getAllGroupInf(df)`: Compute the correlation between all object columns and all numeric columns.
