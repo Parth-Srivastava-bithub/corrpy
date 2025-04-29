@@ -3,7 +3,7 @@
 
 ## 🔧 What's New?
 
-The function `cp.getTotalCorrRelation(df)` has been upgraded with **2 new optional parameters**:
+The function `cp.getTotalCorrRelation(df)` just got a **power boost** ⚡ with 2 new optional parameters:
 
 ```python
 cp.getTotalCorrRelation(df, features=["correlation", "pearson", "distance"], feature="correlation")
@@ -12,14 +12,15 @@ cp.getTotalCorrRelation(df, features=["correlation", "pearson", "distance"], fea
 ### 🆕 New Parameters:
 
 - **`features`** *(list)*:  
-  Choose which statistical relationships you want to calculate.  
-  Options include:
+  Select which statistical relationships you want to calculate:
   - `"correlation"` *(alias for Spearman)*
   - `"pearson"`
   - `"distance"`
 
 - **`feature`** *(string)*:  
-  Pick one test from the list above for deeper insights and trend interpretations.
+  Choose the one you want deeper insights or interpretations on.
+
+---
 
 ### 💡 Example Use Case:
 
@@ -27,14 +28,24 @@ cp.getTotalCorrRelation(df, features=["correlation", "pearson", "distance"], fea
 cp.getTotalCorrRelation(df, features=["pearson", "distance"], feature="pearson")
 ```
 
-This gives you a DataFrame with:
-- `Feature A`, `Feature B`
-- Pearson values
-- Distance values  
-...and focuses analysis around **Pearson** correlation.
+This gives a table like:
+
+| Feature A | Feature B | Pearson | Distance |
+|-----------|------------|---------|----------|
+
+…and all trend-based logic will revolve around **Pearson** here.
+
+---
+
+### 🚀 Performance Boost:
+
+The entire computation logic is now **way more optimized** —  
+⚡ From taking **minutes** → now it's done in **seconds**.  
+So large datasets won't slow you down anymore.
+
+---
 
 ### 🤝 TL;DR
-Want multiple insights at once? Use `features`.  
-Want to focus analysis on one? Use `feature`.
-
-*No more confusion, just clean comparisons.* ✅
+- Use `features` for multiple comparisons.
+- Use `feature` for focused interpretation.
+- Super fast. Beginner-friendly. One call does it all.
