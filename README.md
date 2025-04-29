@@ -97,6 +97,13 @@ corrpy.getTotalCorrRelation(df)
 - Romantic 💘  
 - Zen 🧘  
 - Paranoid 🕵️
+- Overwhelmed 😩
+- Curious 🤔
+- Cautious ⚠️
+- Funny 😂
+
+
+
 
 ---
 
