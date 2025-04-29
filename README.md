@@ -49,21 +49,18 @@ corrpy.getTotalCorrRelation(df)
 
 ### All Methods you can use 
 
-1. `getMethods()`: Returns a list of all available methods in Corrpy.
+1. `getTotalCorrRelation(df, features = ["Correlation", "Pearson", "Distance"], feature = "Correlation", short = False)`: Pass a pandas DataFrame to get correlation analysis across all columns and get trends, interpretations and score with respect to feature u added in parameter.
 
-2. `getTotalCorrRelation(df, features = ["Correlation", "Pearson", "Distance"], feature = "Correlation", short = False)`: Pass a pandas DataFrame to get correlation analysis across all columns and get trends, interpretations and score with respect to feature u added in parameter.
-
-3. `getGroupInf(objColumn, numColumn, df)`: Compute the correlation between the given object column and the given numeric column.
-4. `getAllGroupInf(df)`: Compute the correlation between all object columns and all numeric columns.
-5. `setApi()`: Securely handles your [Together.ai](https://www.together.ai/) API token.
-6. `explainAITC(df, feature="Correlation", character="Data analyst", mode="Confused")`: Get AI insights for correlation analysis.
-7. `shift(num1, num2, shiftValue, df)`: Test how your dependent variable reacts to small changes in an input variable.
-8. `explainShift(num1, num2, shiftValue, df, character = "Data analyst", mode = "Funny...")`: An AI analyst explains the output of `shift()` like you're in a meeting with your CEO.
-9. `checkTransit(firstFeature, secondFeature, ThirdFeature)`: Check for transitive correlation between three features.
-10. `explainPartialCorrelation(num1, num2, df, character = "Data analyst", mode = "Funny...")`: Get AI insights for partial correlation analysis.
-11. `checkTransitForColumn(column, df)`: Check for transitive correlation between a column and all other columns.
-12. `explainTransitForcolumn(column, df, character = "Data analyst", mode = "Funny...")`: An AI analyst explains the output of `checkTransitForColumn()` like you're in a meeting with your CEO.
----
+2. `getGroupInf(objColumn, numColumn, df)`: Compute the correlation between the given object column and the given numeric column.
+3. `getAllGroupInf(df)`: Compute the correlation between all object columns and all numeric columns.
+4. `setApi()`: Securely handles your [Together.ai](https://www.together.ai/) API token.
+5. `explainAITC(df, feature="Correlation", character="Data analyst", mode="Confused")`: Get AI insights for correlation analysis.
+6. `shift(num1, num2, shiftValue, df)`: Test how your dependent variable reacts to small changes in an input variable.
+7. `explainShift(num1, num2, shiftValue, df, character = "Data analyst", mode = "Funny...")`: An AI analyst explains the output of `shift()` like you're in a meeting with your CEO.
+8. `checkTransit(firstFeature, secondFeature, ThirdFeature)`: Check for transitive correlation between three features.
+9. `explainPartialCorrelation(num1, num2, df, character = "Data analyst", mode = "Funny...")`: Get AI insights for partial correlation analysis.
+10. `checkTransitForColumn(column, df)`: Check for transitive correlation between a column and all other columns.
+11. `explainTransitForcolumn(column, df, character = "Data analyst", mode = "Funny...")`: An AI analyst explains the output of `checkTransitForColumn()` like you're in a meeting with your CEO.
 
 
 ---
