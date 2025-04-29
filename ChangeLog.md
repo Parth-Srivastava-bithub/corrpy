@@ -1,4 +1,99 @@
 
+
+# v 0.3.10 🚀
+
+## ✨ What's New
+
+### 🎭 Character Personalization
+Added `character` parameter to both `explainAITC()` and `explainShift()` functions.  
+Now your insights can be delivered by anyone — from **Krishna** to **Chandler Bing** to **Elon Musk**. Pick your storyteller.  
+
+### 🎨 Emotion Control
+Added `mode` parameter that lets you pick the *mood* of the explanation: want it sarcastic, sad, or romantic? Your call.
+
+---
+
+## 🛠 Updated Functions
+
+- `explainAITC(df, feature="Correlation", character="Chandler Bing", mode="Confused")`
+- `explainShift("col1", "col2", shift, df, character="Manager", mode="Excited")`
+
+---
+
+## 🚀 How to Use
+
+### 🔧 Parameters
+
+- `character`: The persona delivering the output.
+- `mode`: The emotional tone of the explanation.
+
+### ✅ Examples
+
+```python
+# Krishna calmly explaining correlation shift
+explainAITC(df, feature="Correlation", character="Krishna", mode="Zen")
+
+# A sarcastic manager comparing column shifts
+explainShift("Sales", "Revenue", 2, df, character="Manager", mode="Sarcastic")
+
+# Chandler Bing being confused by outliers
+explainAITC(df, feature="Anomaly", character="Chandler Bing", mode="Confused")
+
+# And other explain Methods too
+```
+
+---
+
+## 👤 Available Characters
+
+- Data Analyst  
+- Manager  
+- Data Scientist  
+- Data Engineer  
+- Modi  
+- Elon Musk  
+- Angry Professor  
+- Chandler Bing  
+- AI Guru  
+- Startup Bro  
+
+(*More being added weekly – you can easily expand the template!*)
+
+---
+
+## 🎭 Emotion Modes (aka `mode`)
+
+- Happy 🎉  
+- Angry 😠  
+- Sad 😢  
+- Excited 🤩  
+- Confused 😕  
+- Serious 💼  
+- Sarcastic 🙃  
+- Romantic 💘  
+- Zen 🧘  
+- Paranoid 🕵️
+
+---
+
+
+
+---
+
+## 🧾 Summary Table
+
+| Feature       | Description                                              |
+|---------------|----------------------------------------------------------|
+| `character`   | Choose the personality explaining the output             |
+| `mode`        | Control the emotion/mood of the response                 |
+| API Used      | Together AI - LLaMA 4 Maverick 17B                       |
+| Ideal For     | Storytelling, reporting, demo dashboards, Slack bots    |
+
+
+---
+
+
+
 # V 0.3.7 🚀
 
 ## 🔧 What's New?
@@ -49,3 +144,4 @@ So large datasets won't slow you down anymore.
 - Use `features` for multiple comparisons.
 - Use `feature` for focused interpretation.
 - Super fast. Beginner-friendly. One call does it all.
+

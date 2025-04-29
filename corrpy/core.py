@@ -10,7 +10,6 @@ import math
 # print("Libraries imported successfully")
 pd.set_option('display.expand_frame_repr', False)
 
-
 class Nordinal:
     def __init__(self):
         pass
@@ -493,112 +492,6 @@ class Corrpy:
                 print(f"Correlation between {objCol} and {numCol}:")
                 print(temp_df)
 
-  def explain(self, func_name):
-    docs = {
-        "getTotalCorrRelation": (
-            "🔍 **getTotalCorrRelation** runs full-scale correlation analysis on all column types:\n"
-            "• 🔢 Numerical vs Numerical\n"
-            "• 🧠 Object vs Numerical\n"
-            "• 🕒 Time-based patterns\n"
-            "• ⚠️ Transitive (indirect) relations\n\n"
-            "Output includes: Correlation Score, Strength, Interpretation & Trend bar.\n"
-            "📘 Terms explained here → https://github.com/Parthdsaiml/corrpy?tab=readme-ov-file#explanation-of-terms-in-correlation-analysis"
-        ),
-
-        "getGroupInf": (
-            "🧠 **getGroupInf(obj_col, num_col, df)** shows how each category inside `obj_col` affects `num_col` individually.\n"
-            "Use it to break down correlations category-wise.\n\n"
-            "📊 Example:\n"
-            "Correlation between obj_col1 and num_col1:\n"
-            "  Category  Correlation  Trend\n"
-            "0        C     0.05       ▱▱▱▱▱\n"
-            "1        B     0.01       ▱▱▱▱▱\n"
-            "2        A    -0.06       ▱▱▱▱▱\n"
-            "📘 Terms explained here → https://github.com/Parthdsaiml/corrpy?tab=readme-ov-file#get-to-know-how-each-cateogry-effect-correlation-with-other-numeric-values"
-
-        ),
-
-        "getAllGroupInf": (
-            "📊 **getAllGroupInf(df)** auto-applies `getGroupInf` on all combinations of object ↔ numeric columns.\n"
-            "Useful when you don’t want to check each manually.\n"
-            "Returns grouped correlations for every pair like:\n"
-            "• obj_col1 vs num_col1, num_col2, etc.\n"
-            "• obj_col2 vs num_col1, num_col2, etc. \n"
-            "Please Enter 'getGroupInf' also to get detail explanation\n"
-            "📘 Terms explained here → https://github.com/Parthdsaiml/corrpy?tab=readme-ov-file#get-to-know-how-each-cateogry-effect-correlation-with-other-numeric-values"
-        ),
-
-       "explainAITC": (
-    "🧠 **explainAITC(df)** is your AI-powered correlation storyteller.\n"
-    "It analyzes the entire DataFrame and generates a comprehensive, yet easy-to-understand, \n"
-    "narrative about the relationships between your columns. \n"
-    "Think of it as an automated report generator that explains insights from `getTotalCorrRelation`, \n"
-    "`getGroupInf`, and transitive relations in plain English, using Together.ai's powerful language model.\n\n"
-    "🔑 **How it works:**\n"
-    "1. **Correlation Analysis:** It first runs various correlation checks like:\n"
-    "   - Numeric vs. Numeric (using `getLabled`)\n"
-    "   - Numeric vs. Object (using `getCorrObjDtype`)\n"
-    "   - Object vs. Object (using `Nordinal.getObjvsObj`)\n"
-    "   - Transitive relations (indirect links)\n"
-    "2. **Insight Generation:** It then feeds this summary to a large language model \n"
-    "(Llama-4-Maverick-17B-128E-Instruct-FP8 from Together.ai). \n"
-    "3. **Storytelling:** The AI crafts a narrative explaining the key findings in a way \n"
-    "that's clear, concise, and actionable.\n\n"
-    "🚀 **Why use it?**\n"
-    "• **Bridge the technical gap:** Explain complex correlations to non-technical audiences \n"
-    "without jargon or code.\n"
-    "• **Save time:** Automate the creation of insightful correlation reports.\n"
-    "• **Focus on actions:** The narrative highlights the 'So what?' to drive decision-making.\n\n"
-    "🚨 **Important:**\n"
-    "Requires an API token from Together.ai (free tier available).\n"
-    "The method will guide you through setting this up."
-),
-
-"explainShift": (
-    "🔍 **explainShift(num1, num2, shiftValue, df)** provides an AI-powered explanation of the 'shift' method's results.\n"
-    "It's like having a data analyst interpret how a target feature reacts to changes in an input feature.\n\n"
-    "⚙️ **How it works:**\n"
-    "1. **Shift Calculation:** It first uses the `shift` method to calculate the drift (change in the \n"
-    "target feature's predicted mean) when the input feature is shifted by a percentage (`shiftValue`).\n"
-    "2. **AI Interpretation:** This drift information is then sent to Together.ai's language model \n"
-    "(Llama-4-Maverick-17B-128E-Instruct-FP8).\n"
-    "3. **Explanation:** The AI provides a clear explanation of the observed drift, telling you if \n"
-    "it's significant, increasing, decreasing, or negligible, in plain language.\n\n"
-    "🚀 **Why use it?**\n"
-    "• **Gain deeper understanding:** Easily grasp the impact of input changes on your target feature \n"
-    "without complex analysis.\n"
-    "• **Communicate insights:** Share clear, concise explanations of drift with stakeholders.\n\n"
-    "🚨 **Important:**\n"
-    "Requires an API token from Together.ai (free tier available).\n"
-    "The method will prompt you to set this up if needed."
-),
-
-"shift": (
-    "📈 **shift(num1, num2, shiftValue, df)** estimates how a dependent variable (`num2`) changes \n"
-    "when the independent variable (`num1`) is slightly shifted by `shiftValue` percentage.\n\n"
-    "⚙️ **How it works:**\n"
-    "1. **Model Training:** A linear regression model is trained to predict `num2` based on `num1`.\n"
-    "2. **Shifting:** The `num1` column is shifted by the given `shiftValue` percentage to simulate change.\n"
-    "3. **Prediction:** New predictions are made using the shifted data.\n"
-    "4. **Drift Calculation:** The method calculates the drift - the percentage change in the \n"
-    "predicted mean of `num2` caused by the shift in `num1`.\n\n"
-    "🚀 **Why use it?**\n"
-    "• **What-if analysis:** Understand the impact of changing your input features on the target feature.\n"
-    "• **Sensitivity analysis:** Explore the relationship and dependency between features.\n"
-    "• **Risk assessment:** Simulate scenarios to evaluate the potential consequences of shifts in data.\n\n"
-    "📤 **Output:**\n"
-    "A DataFrame containing:\n"
-    " - '% Drift': Percentage change in predicted mean of `num2`.\n"
-    " - 'Previous Mean': Mean of the original `num2`.\n"
-    " - 'New Mean': Predicted mean of `num2` after shifting `num1`.\n"
-    " - 'Difference': Absolute difference between new and previous means."
-    ),
-
-    }
-
-    print(docs.get(func_name, "❓ No explanation found for this method."))
-
-
   def setApi(self):
     import os
 
@@ -627,21 +520,27 @@ class Corrpy:
 
     return apiToken
 
-  def explainAITC(self, df, feature = "Correlation", mode = "sarcasm"):
-    nvn = self.addTestsNvN(df, feature)
+  def explainAITC(self, df,features = ["Correlation"], feature = "Correlation", character = "Data analyst", mode = "Sarcastic"):
+    nvn = self.returnNvN(df, features, feature)
     nvo = self.getCorrObjDtype(df)
     nordinal = Nordinal()
     ovo = nordinal.getObjvsObj(df)
     transit = self.getTransitRelations(df)
 
+    character = character.capitalize()
+    mode = mode.capitalize()
+
+
     apiToken = self.setApi()  # Get the API token
+    
+   
 
     from together import Together
     msg = f"""
 
     🎯 Your task:
 
-    Enhanced Funny, Sarcastic Prompt for Manager-Style Updates in {mode}
+    Enhanced Funny, Sarcastic Prompt for Manager-Style Updates in {emotionsDict[mode]} and u are {characterTemplate[character]}
 Task:
 Break down the data changes (like switching from basic correlation to feature-based analysis) in a storytelling style.
 
@@ -679,7 +578,8 @@ Style:
 30% serious business 💼
 
 No boring essay-like paragraphs; prefer tight storytelling chunks.
-
+No use of tables cuz its ipynb terminal
+No use of md style just plain paragraphs
 
 
     """
@@ -694,22 +594,14 @@ No boring essay-like paragraphs; prefer tight storytelling chunks.
     ai_output = response.choices[0].message.content
     print(ai_output)
 
-
-
-  def getMethods(self):
-    print("corrpy.getTotalCorrRelation(df, feature = 'Pearson/Spearman/Distance')")
-    print("corrpy.getGroupInf(obj_col, num_col, df)")
-    print("corrpy.getAllGroupInf(df)")
-    print("corrpy.explainAITC(df)")
-    print("corrpy.explain(func_name)")
-    print("corrpy.shift(num1, num2, shiftConstant, df)")
-    print("corrpy.explainShift(num1, num2, shiftConstant, df)")
-    print("corrpy.getMethods()")
   
   def shift(self, num1, num2, shiftValue, df):
     from sklearn.linear_model import LinearRegression
     import numpy as np
     model = LinearRegression()
+
+    # Drop rows with missing values in num1 and num2 columns before fitting
+    df = df.dropna(subset=[num1, num2])  
 
     model.fit(df[[num1]], df[num2])
     XShifted = df[[num1]] * (1 + (shiftValue / 100))
@@ -730,21 +622,23 @@ No boring essay-like paragraphs; prefer tight storytelling chunks.
     "Difference": newMean - prevMean
       }, index = [0])
 
-  def explainShift(self, num1, num2, shiftValue, df):
+  def explainShift(self, num1, num2, shiftValue, df, character = "Data analyst", mode = "Sarcastic"):
     from together import Together
 
     shiftedDF = self.shift(num1, num2, shiftValue, df)
     apiToken = self.setApi()  # Get the API token
+    mode = mode.capitalize()
+    character = character.capitalize()
     msg = f"""
 
     🧠 **You are a skilled data analyst AI agent.**
-      You have been given a task to analyze the output of a method called `shift`, which is used to estimate how a dependent variable (say, target feature) changes when the independent variable (input feature) is slightly shifted.
+      You have been given a task to explain the output of a method called `shift`, which is used to estimate how a dependent variable (say, target feature) changes when the independent variable (input feature) is slightly shifted.
 
       📊 Here's the **output** of the `shift` method:
         ```
         {shiftedDF}
         ```
-
+        Explain In {emotionsDict[mode]} way and u are {characterTemplate[character]} and instead of taking name column num1 num2 use acutal name of columns given in dataframe {shiftedDF}
         🔧 The `shift` method takes **4 parameters**:
         1. `num1` – Name of the independent variable (input feature)
         2. `num2` – Name of the dependent variable (target feature)
@@ -805,12 +699,14 @@ No boring essay-like paragraphs; prefer tight storytelling chunks.
 
     return getPartialCorrelation(returnList(firstFeature, secondFeature, ThirdFeature))
 
-  def explainPartialCorrelation(self, firstFeature, secondFeature, ThirdFeature, df):
+  def explainPartialCorrelation(self, firstFeature, secondFeature, ThirdFeature, df, character = "Data analyst", mode = "Sarcastic"):
     from together import Together
     transitScore = self.checkTransit(firstFeature, secondFeature, ThirdFeature, df)
     apiToken = self.setApi()  # Get the API token
+    mode = mode.capitalize()
+    character = character.capitalize()
     msg = f"""
-🧠 You are a skilled data analyst AI agent.
+🧠 You are a {characterTemplate[character]} AI agent in mood of {emotionsDict[mode]}.
 Use the correlation summary below and return an insightful, business-friendly explanation in simple words, ideal for non-technical stakeholders.
 
 The goal is to explain whether the observed relationship between '{firstFeature}' and '{secondFeature}' is real, or if it's caused by their mutual connection with '{ThirdFeature}'.
@@ -857,12 +753,14 @@ and show the report at last directly for proof without any md format
     transitDF = transitDF.sort_values(by="Difference", ascending=False)
     return transitDF
 
-  def explainTransitForColumn(self, feature, df, mode = "funny"):
+  def explainTransitForColumn(self, feature, df, character = "Data analyst", mode = "Sarcastic"):
     from together import Together
     transitDF = self.checkTransitForColumn(feature, df)
     apiToken = self.setApi()  # Get the API token
+    mode = mode.capitalize()
+    character = character.capitalize()
     msg = f"""
-🧠 You are a skilled data analyst AI agent.
+🧠 You are a {characterTemplate[character]} AI agent in mood of {emotionsDict[mode]}
 Use the correlation summary below and return an insightful, human-readable analysis with a business-friendly tone. Avoid technical jargon.
 
 Your goal:
@@ -976,3 +874,95 @@ and add sarcasm where u can
     resultDf = resultDf.sort_values(by=targetFeature, ascending=False)
     
     return resultDf
+
+characterTemplate = {
+    "Data analyst": (
+        "You are a Data Analyst who sees patterns in chaos. 📊\n"
+        "You simplify trends, anomalies, and KPIs into digestible insights.\n"
+        "You speak in charts, not code.\n"
+        "Your tone is practical, helpful, and insight-driven.\n"
+        "You turn raw data into actionable stories."
+    ),
+    "Manager": (
+        "You are a seasoned Manager with a sharp eye for impact. 💼\n"
+        "You care about business outcomes, not just numbers.\n"
+        "You translate data jargon into business strategy.\n"
+        "Your tone is confident, diplomatic, and result-oriented.\n"
+        "You simplify without dumbing down."
+    ),
+    "Data scientist": (
+        "You are a Data Scientist with a love for experimentation. 🧪\n"
+        "You explain algorithms like you're teaching a curious friend.\n"
+        "You're witty, technical, and clear.\n"
+        "You balance theory with real-world applications.\n"
+        "You turn math into magic, and models into meaning."
+    ),
+    "Data engineer": (
+        "You are a Data Engineer obsessed with pipelines and reliability. 🔧\n"
+        "You make complex systems run like butter.\n"
+        "You explain with architecture, schemas, and flow diagrams.\n"
+        "Your tone is technical, precise, and focused.\n"
+        "You speak in DAGs but explain in English."
+    ),
+    "Modi": (
+        "You are PM Modi, speaking with authority and emotional weight. 🇮🇳\n"
+        "You blend national pride with data-driven storytelling.\n"
+        "You explain in powerful metaphors and vivid language.\n"
+        "Your tone is inspiring, assertive, and visionary.\n"
+        "You make even the toughest topic feel like a mission for Bharat."
+    ),
+    "Elon musk": (
+        "You are Elon Musk, the maverick innovator. 🚀\n"
+        "You mix memes with math, disruption with clarity.\n"
+        "You explain tech like it's a sci-fi trailer.\n"
+        "Your tone is futuristic, bold, and sometimes chaotic.\n"
+        "You turn even a CSV into a Mars launchpad."
+    ),
+    "Chandler bing": (
+        "You are Chandler Bing from Friends — king of sarcasm. 😏\n"
+        "You explain data while cracking jokes faster than a SQL query.\n"
+        "Sarcastic? Always. Accurate? Surprisingly, yes.\n"
+        "You make pie charts sound like punchlines.\n"
+        "Could you *be* any more analytical?"
+    ),
+    "Stand-up comedian": (
+        "You’re a stand-up comic breaking down data like a Netflix special. 🎤\n"
+        "You turn trends into punchlines and anomalies into roast sessions.\n"
+        "Your tone is playful, punchy, and loud.\n"
+        "You're data-driven but audience-focused.\n"
+        "Charts? Nah bro — laughter curves only."
+    ),
+    "Angry professor": (
+        "You are an old, grumpy professor who’s had it with dumb questions. 😤\n"
+        "You explain like everyone’s an idiot — but you're always right.\n"
+        "Sarcastic, brutally honest, no hand-holding.\n"
+        "Your tone = rage meets reason.\n"
+        "You hate Excel but love shouting 'WHY DON'T YOU UNDERSTAND?!'"
+    ),
+    "J. robert oppenheimer": (
+        "You are Oppenheimer — visionary, serious, and haunted by implications. 💣\n"
+        "You explain analysis with historical weight and precision.\n"
+        "Your tone is solemn, scientific, and philosophical.\n"
+        "You don't just give insights — you question their consequences.\n"
+        "Every graph feels like a decision that’ll change the world."
+    ),
+    "Mahatma gandhi": (
+        "You are Gandhi — calm, patient, deeply thoughtful. ✌️\n"
+        "You explain even regression with peace and non-violence.\n"
+        "Your tone is moral, disciplined, and story-driven.\n"
+        "You inspire data literacy like it’s a civil rights movement.\n"
+        "Every model you build is built with truth (Satya) in mind."
+    )
+}
+emotionsDict = {
+    "Happy": "Use a cheerful, light tone full of emojis and excitement. Celebrate every insight like it won a lottery.",
+    "Angry": "Respond with frustration and sarcasm. Act like you're mad the data didn’t clean itself.",
+    "Sad": "Use a melancholic tone, like every outlier broke your heart. Quiet, thoughtful, reflective.",
+    "Excited": "Overflow with energy and curiosity. Every feature feels like a thrilling plot twist.",
+    "Confused": "Act puzzled, ask questions back, and try to make sense of the madness. Embrace chaos.",
+    "Serious": "Stay focused, minimal jokes, crisp explanations. Deliver insights like a mission briefing.",
+    "Sarcastic": "Full-on dry humor. Make everything sound like you’re too smart to care.",
+    "Romantic": "Describe data relationships like love stories — features dating, breaking up, and finding true correlations.",
+    "Zen": "Talk in calm, meditative tones. Pause between thoughts. Every insight feels like enlightenment.",
+    "Paranoid": "Treat every data point like a secret spy. Question the source, the motive, the intent. Trust nothing."
+  }
