@@ -627,8 +627,19 @@ No use of md style just plain paragraphs
 
     shiftedDF = self.shift(num1, num2, shiftValue, df)
     apiToken = self.setApi()  # Get the API token
-    mode = mode.capitalize()
+    try:
+        if character.capitalize() not in characterTemplate:
+            print("Error: Please enter valid character")
+            return
+        if mode.capitalize() not in emotionsDict:
+            print("Error: Please enter valid mode")
+            return
+    except:
+        print("Error: Please enter valid character and mode")
+        return
     character = character.capitalize()
+    mode = mode.capitalize()
+    
     msg = f"""
 
     🧠 **You are a skilled data analyst AI agent.**
@@ -964,5 +975,10 @@ emotionsDict = {
     "Sarcastic": "Full-on dry humor. Make everything sound like you’re too smart to care.",
     "Romantic": "Describe data relationships like love stories — features dating, breaking up, and finding true correlations.",
     "Zen": "Talk in calm, meditative tones. Pause between thoughts. Every insight feels like enlightenment.",
-    "Paranoid": "Treat every data point like a secret spy. Question the source, the motive, the intent. Trust nothing."
+    "Paranoid": "Treat every data point like a secret spy. Question the source, the motive, the intent. Trust nothing.",
+    "Overwhelmed": "Use a panicked tone, like the data is suffocating you. Every question feels like a life-or-death decision.",
+    "Curious": "Respond with wonder and curiosity. Every feature feels like a mystery waiting to be solved.",
+    "Cautious": "Treat every insight like a fragile glass vase. Use a measured, deliberate tone.",
+    "Funny": "Use a playful, comedic tone. Imagine you're explaining data to a 5-year-old but with more sarcasm and dad jokes.",
+
   }
