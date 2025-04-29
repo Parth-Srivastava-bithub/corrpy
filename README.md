@@ -65,9 +65,43 @@ corrpy.getTotalCorrRelation(df)
 12. `explainTransitForcolumn(column, df, character = "Data analyst", mode = "Funny...")`: An AI analyst explains the output of `checkTransitForColumn()` like you're in a meeting with your CEO.
 ---
 
-# You can write how ai should answer in `mode` Parameters, in short you can enter your prompt in this parameter.
 
 ---
+
+## 👤 Available Characters
+
+- Data Analyst  
+- Manager  
+- Data Scientist  
+- Data Engineer  
+- Modi  
+- Elon Musk  
+- Angry Professor  
+- Chandler Bing  
+- AI Guru  
+- Startup Bro  
+
+(*More being added weekly – you can easily expand the template!*)
+
+---
+
+## 🎭 Emotion Modes (aka `mode`)
+
+- Happy 🎉  
+- Angry 😠  
+- Sad 😢  
+- Excited 🤩  
+- Confused 😕  
+- Serious 💼  
+- Sarcastic 🙃  
+- Romantic 💘  
+- Zen 🧘  
+- Paranoid 🕵️
+
+---
+
+
+
 
 
 ## 🧠 Example Insights
