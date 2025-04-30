@@ -60,7 +60,6 @@ corrpy.getTotalCorrRelation(df)
 9. `explainPartialCorrelation(num1, num2, df, character = "Data analyst", mode = "Funny...", prompt = "Explain like Angry Professor")`: Get AI insights for partial correlation analysis.
 10. `checkTransitForColumn(column, df, prompt = "Explain like Mahatma Gandhi")`: Check for transitive correlation between a column and all other columns.
 11. `explainTransitForcolumn(column, df, character = "Data analyst", mode = "Funny...", prompt = "Explain like Oppenheimer")`: An AI analyst explains the output of `checkTransitForColumn()` like you're in a meeting with your CEO.
-
 12. `explainAI(result, character = "Data analyst", mode = "Funny...", prompt = "Explain like angry professor")`: Get AI insights for any result.
 
 ---
