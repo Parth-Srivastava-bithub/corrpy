@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: Corrpy
-Version: 0.3.17
+Version: 0.3.18
 Summary: Correlation analysis tool with smart interpretation
 Home-page: https://github.com/Parthdsaiml/corrpy
 Author: YellowForest
@@ -75,6 +75,7 @@ corrpy.getTotalCorrRelation(df)
 10. `checkTransitForColumn(column, df)`: Check for transitive correlation between a column and all other columns.
 11. `explainTransitForcolumn(column, df, character = "Data analyst", mode = "Funny...", prompt = "Explain like Oppenheimer")`: An AI analyst explains the output of `checkTransitForColumn()` like you're in a meeting with your CEO.
 12. `explainAI(result, character = "Data analyst", mode = "Funny...", prompt = "Explain like angry professor")`: Get AI insights for any result.
+13. `makeReport(self, method="null", df=None, column=None, feature=None, target=None, prompt="Null", size="short", constant=None, first=None, second=None, third=None)`: Generate a human-like, well-written paragraph suitable for direct pasting into a PowerPoint slide, based on the output of other methods.
 
 ---
 

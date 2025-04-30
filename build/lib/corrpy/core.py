@@ -665,98 +665,103 @@ No use of md style just plain paragraphs
     print(ai_output)
     
 
-  def makeReport(self, method = "null", prompt = "Null", df = None, objColumn = None, numColumn = None, num1 = None, num2 = None, constant = None, firstFeature = None, secondFeature = None, thirdFeature = None, size = "short", column = None):
+  def makeReport(self, method="null", df=None, column=None, feature=None, target=None, prompt="Null", size="short", constant=None, first=None, second=None, third=None):
     method = method.lower()
 
-    if (method == "null"):
-      print("Please enter a valid method")
-      return
+    if method == "null":
+        print("Please enter a valid method")
+        return
+
     msg = ""
-    if (method == "totalcorrelation"):
-      nvn = self.returnNvN(df)
-      nvo = self.getCorrObjDtype(df)
-      nordinal = Nordinal()
-      ovo = nordinal.getObjvsObj(df)
-      transit = self.getTransitRelations(df)
 
-      msg = f"""
-      Report = {nvn}, {nvo}, {ovo}, {transit}
+    # Helper: when prompt is present, allow tweaks
+    prompt_tweak = f"add tweaks if prompt = {prompt} not null, if prompt is then no tweak, just give plain formal answer"
+
+    if method == "totalcorrelation":
+        nvn = self.returnNvN(df)
+        nvo = self.getCorrObjDtype(df)
+        nordinal = Nordinal()
+        ovo = nordinal.getObjvsObj(df)
+        transit = self.getTransitRelations(df)
+
+        msg = f"""
+        Report = {nvn}, {nvo}, {ovo}, {transit}
 Generate a human-like, well-written paragraph suitable for direct pasting into a PowerPoint slide. Avoid markdown, bullet points, or formatting—just plain, presentation-friendly text that sounds natural and engaging
 size should be {size}
+{prompt_tweak}
+        """
 
-add tweaks if prompt = {prompt} not null, if prompt is then no tweak, just give plain formal answer
-    """
-    
-    elif (method == "getgroupinf"):
-      ggi = self.getGroupInf(objColumn, numColumn, df)
+    elif method == "getgroupinf":
+        ggi = self.getGroupInf(column, target, df)
 
-      msg = f"""
-      Report = {ggi}
+        msg = f"""
+        Report = {ggi}
 Generate a human-like, well-written paragraph suitable for direct pasting into a PowerPoint slide. Avoid markdown, bullet points, or formatting—just plain, presentation-friendly text that sounds natural and engaging
 size should be {size}
-this report is about how each category effect correlation in categorical/object column with respect to numerical column
-add tweaks if prompt = {prompt} not null, if prompt is then no tweak, just give plain formal answer
-    """
+this report is about how each category affects correlation in categorical/object column with respect to numerical column.
+{prompt_tweak}
+        """
 
-    elif(method == "getallgroupinf"):
-      ggi = self.getAllGroupInf(df)
+    elif method == "getallgroupinf":
+        ggi = self.getAllGroupInf(df)
 
-      msg = f"""
-      Report = {ggi}
+        msg = f"""
+        Report = {ggi}
 Generate a human-like, well-written paragraph suitable for direct pasting into a PowerPoint slide. Avoid markdown, bullet points, or formatting—just plain, presentation-friendly text that sounds natural and engaging
 size should be {size}
-this report is about how each category effect correlation in categorical/object column with respect to numerical column but for all columns other than datetime and numerical
-add tweaks if prompt = {prompt} not null, if prompt is then no tweak, just give plain formal answer
-    """
+This report is about how each category affects correlation in all object columns (except datetime/numerical) with respect to numerical columns.
+{prompt_tweak}
+        """
 
-    elif(method == "shift"):
-      shift = self.shift(num1, num2, constant, df)
+    elif method == "shift":
+        shift = self.shift(feature, target, constant, df)
 
-      msg = f"""
-      Report = {shift}
+        msg = f"""
+        Report = {shift}
 Generate a human-like, well-written paragraph suitable for direct pasting into a PowerPoint slide. Avoid markdown, bullet points, or formatting—just plain, presentation-friendly text that sounds natural and engaging
 size should be {size}
-shift is about how much the dependent variable (target feature = {num2}) changes when the independent variable (input feature = {num1}) is shifted by a certain percentage.
-add tweaks if prompt = {prompt} not null, if prompt is then no tweak, just give plain formal answer
-    """
-    elif (method == "checktransit"):
-      transit = self.checkTransit(firstFeature, secondFeature, thirdFeature)
+This report shows how much the dependent variable (target = {target}) changes when the independent variable (feature = {feature}) is shifted by a certain percentage.
+{prompt_tweak}
+        """
 
-      msg = f"""
-      Report = {transit}
+    elif method == "checktransit":
+        transit = self.checkTransit(first, second, third)
+
+        msg = f"""
+        Report = {transit}
 Generate a human-like, well-written paragraph suitable for direct pasting into a PowerPoint slide. Avoid markdown, bullet points, or formatting—just plain, presentation-friendly text that sounds natural and engaging
 size should be {size}
-      The transitive relationship is a phenomenon where a correlation between two variables exists due to a third variable. The result of this method is a list of three correlations: between the first and second feature, the first and third feature, and the second and third feature.
-add tweaks if prompt = {prompt} not null, if prompt is then no tweak, just give plain formal answer
+The transitive relationship is where a correlation between two variables exists due to a third variable. This result includes correlations between {first}-{second}, {first}-{third}, and {second}-{third}.
+{prompt_tweak}
+        """
 
-    """
+    elif method == "checktransitforcolumn":
+        transit = self.checkTransitForColumn(column, df)
 
-    elif (method == "checktransitforcolumn"):
-      transit = self.checkTransitForColumn(column, df)
-
-      msg = f"""
-      Report = {transit}
+        msg = f"""
+        Report = {transit}
 Generate a human-like, well-written paragraph suitable for direct pasting into a PowerPoint slide. Avoid markdown, bullet points, or formatting—just plain, presentation-friendly text that sounds natural and engaging
 size should be {size}
-      The transitive relationship is a phenomenon where a correlation between two variables exists due to a third variable. The result of this method is a list of three correlations: between the first and second feature, the first and third feature, and the second and third feature.
-      this report shows that all transitive or non transitive relations with other columns
-add tweaks if prompt = {prompt} not null, if prompt is then no tweak, just give plain formal answer
-    """
-    
+This report shows all transitive/non-transitive relationships of '{column}' with other columns based on correlation.
+{prompt_tweak}
+        """
+
     else:
-      print("Enter valid method")
-      return
+        print("Enter valid method")
+        return
+
     from together import Together
-    apiToken = self.setApi()  # Get the API token
-    client = Together(api_key=apiToken)  # Use the token here
+    apiToken = self.setApi()
+    client = Together(api_key=apiToken)
 
     response = client.chat.completions.create(
         model="meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
         messages=[{"role": "user", "content": msg}]
     )
-      
+
     ai_output = response.choices[0].message.content
     print(ai_output)
+
 
   def explainShift(self, num1, num2, shiftValue, df, character = "Data analyst", mode = "Sarcastic", prompt = "Null"):
     from together import Together

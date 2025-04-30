@@ -1,6 +1,45 @@
+# v 0.3.18
+
+#### ✅ Simplified Parameters in `makeReport()`  
+No more confusing method-specific params! We’ve cleaned it up so you can use a few **generalized** ones across all report types:
+
+| Old Param            | New Param     | Use Case                                  |
+|----------------------|---------------|--------------------------------------------|
+| `objColumn`          | `column`      | For categorical column-based analysis      |
+| `numColumn`, `num1`  | `feature`     | Used as main numeric/independent feature   |
+| `num2`               | `target`      | Used as dependent/target feature           |
+| `firstFeature`       | `first`       | Used in transitive checks                  |
+| `secondFeature`      | `second`      | Used in transitive checks                  |
+| `thirdFeature`       | `third`       | Used in transitive checks                  |
+
+#### 🧪 Usage Examples:
+
+```python
+# Total Correlation
+cp.makeReport(method="totalcorrelation", df=df)
+
+# Group Info for single column
+cp.makeReport(method="getgroupinf", df=df, column="Gender", feature="Salary")
+
+# Group Info for all object columns
+cp.makeReport(method="getallgroupinf", df=df)
+
+# Shift analysis (change in target if feature is shifted)
+cp.makeReport(method="shift", df=df, feature="Experience", target="Salary", constant=10)
+
+# Transitive relation check between three features
+cp.makeReport(method="checktransit", first="X", second="Y", third="Z", df=df)
+
+# Transitive relation check of one column with all others
+cp.makeReport(method="checktransitforcolumn", column="Age", df=df)
+```
+
+---
+
+
 # v 0.3.17
 
-## Added new method `makeReport(method = "null", prompt = "Null", df = None, objColumn = None, numColumn = None, num1 = None, num2 = None, constant = None, firstFeature = None, secondFeature = None, thirdFeature = None, size = "short", column = None)`
+ Added new method `makeReport(method = "null", prompt = "Null", df = None, objColumn = None, numColumn = None, num1 = None, num2 = None, constant = None, firstFeature = None, secondFeature = None, thirdFeature = None, size = "short", column = None)`
 
 ```python
 # Add result and prompt and get your result
@@ -24,7 +63,7 @@ Revolutionize your data analysis workflow with AI-generated insights!  With `mak
 
 # v 0.3.15
 
-## Added new method `explainAI(result, character="Data analyst", mode="Sarcastic", prompt="Null")`
+Added new method `explainAI(result, character="Data analyst", mode="Sarcastic", prompt="Null")`
 
 ```python
 # Add result and prompt and get your result
