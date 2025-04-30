@@ -621,8 +621,9 @@ No use of md style just plain paragraphs
     "Difference": newMean - prevMean
       }, index = [0])
 
-      
+
   def explainAI(self, result, character = "Data analyst", mode = "Sarcastic", prompt = "Null"):
+    from together import Together
     apiToken = self.setApi()  # Get the API token
     try:
         if character.capitalize() not in characterTemplate:
