@@ -511,7 +511,7 @@ class Corrpy:
             file.write(apiToken)
         print("API Token saved for future use.")
     else:
-        print("Go to https://www.together.ai/ and generate your token. IT'S FREE!!")
+        print("Go to https://api.together.ai/ and generate your token. IT'S FREE!!")
         print("Then paste it here:")
         apiToken = input()  # Get the API token from the user
         with open("api_token.txt", "w") as file:
@@ -624,6 +624,7 @@ No use of md style just plain paragraphs
 
   def explainAI(self, result, character = "Data analyst", mode = "Sarcastic", prompt = "Null"):
     from together import Together
+    
     apiToken = self.setApi()  # Get the API token
     try:
         if character.capitalize() not in characterTemplate:
@@ -649,6 +650,8 @@ No use of md style just plain paragraphs
 
     explain {result}
 
+    in case user asked what is corrpy then u should know what is corrpy {aboutCorrpy}
+    if user didnt ask anything about what is corrpy or about corrpy please DONT EVEN MENTION THIS info just tell them what they are asking
     """
 
     client = Together(api_key=apiToken)  # Use the token here
@@ -661,6 +664,99 @@ No use of md style just plain paragraphs
     ai_output = response.choices[0].message.content
     print(ai_output)
     
+
+  def makeReport(self, method = "null", prompt = "Null", df = None, objColumn = None, numColumn = None, num1 = None, num2 = None, constant = None, firstFeature = None, secondFeature = None, thirdFeature = None, size = "short", column = None):
+    method = method.lower()
+
+    if (method == "null"):
+      print("Please enter a valid method")
+      return
+    msg = ""
+    if (method == "totalcorrelation"):
+      nvn = self.returnNvN(df)
+      nvo = self.getCorrObjDtype(df)
+      nordinal = Nordinal()
+      ovo = nordinal.getObjvsObj(df)
+      transit = self.getTransitRelations(df)
+
+      msg = f"""
+      Report = {nvn}, {nvo}, {ovo}, {transit}
+Generate a human-like, well-written paragraph suitable for direct pasting into a PowerPoint slide. Avoid markdown, bullet points, or formatting—just plain, presentation-friendly text that sounds natural and engaging
+size should be {size}
+
+add tweaks if prompt = {prompt} not null, if prompt is then no tweak, just give plain formal answer
+    """
+    
+    elif (method == "getgroupinf"):
+      ggi = self.getGroupInf(objColumn, numColumn, df)
+
+      msg = f"""
+      Report = {ggi}
+Generate a human-like, well-written paragraph suitable for direct pasting into a PowerPoint slide. Avoid markdown, bullet points, or formatting—just plain, presentation-friendly text that sounds natural and engaging
+size should be {size}
+this report is about how each category effect correlation in categorical/object column with respect to numerical column
+add tweaks if prompt = {prompt} not null, if prompt is then no tweak, just give plain formal answer
+    """
+
+    elif(method == "getallgroupinf"):
+      ggi = self.getAllGroupInf(df)
+
+      msg = f"""
+      Report = {ggi}
+Generate a human-like, well-written paragraph suitable for direct pasting into a PowerPoint slide. Avoid markdown, bullet points, or formatting—just plain, presentation-friendly text that sounds natural and engaging
+size should be {size}
+this report is about how each category effect correlation in categorical/object column with respect to numerical column but for all columns other than datetime and numerical
+add tweaks if prompt = {prompt} not null, if prompt is then no tweak, just give plain formal answer
+    """
+
+    elif(method == "shift"):
+      shift = self.shift(num1, num2, constant, df)
+
+      msg = f"""
+      Report = {shift}
+Generate a human-like, well-written paragraph suitable for direct pasting into a PowerPoint slide. Avoid markdown, bullet points, or formatting—just plain, presentation-friendly text that sounds natural and engaging
+size should be {size}
+shift is about how much the dependent variable (target feature = {num2}) changes when the independent variable (input feature = {num1}) is shifted by a certain percentage.
+add tweaks if prompt = {prompt} not null, if prompt is then no tweak, just give plain formal answer
+    """
+    elif (method == "checktransit"):
+      transit = self.checkTransit(firstFeature, secondFeature, thirdFeature)
+
+      msg = f"""
+      Report = {transit}
+Generate a human-like, well-written paragraph suitable for direct pasting into a PowerPoint slide. Avoid markdown, bullet points, or formatting—just plain, presentation-friendly text that sounds natural and engaging
+size should be {size}
+      The transitive relationship is a phenomenon where a correlation between two variables exists due to a third variable. The result of this method is a list of three correlations: between the first and second feature, the first and third feature, and the second and third feature.
+add tweaks if prompt = {prompt} not null, if prompt is then no tweak, just give plain formal answer
+
+    """
+
+    elif (method == "checktransitforcolumn"):
+      transit = self.checkTransitForColumn(column, df)
+
+      msg = f"""
+      Report = {transit}
+Generate a human-like, well-written paragraph suitable for direct pasting into a PowerPoint slide. Avoid markdown, bullet points, or formatting—just plain, presentation-friendly text that sounds natural and engaging
+size should be {size}
+      The transitive relationship is a phenomenon where a correlation between two variables exists due to a third variable. The result of this method is a list of three correlations: between the first and second feature, the first and third feature, and the second and third feature.
+      this report shows that all transitive or non transitive relations with other columns
+add tweaks if prompt = {prompt} not null, if prompt is then no tweak, just give plain formal answer
+    """
+    
+    else:
+      print("Enter valid method")
+      return
+    from together import Together
+    apiToken = self.setApi()  # Get the API token
+    client = Together(api_key=apiToken)  # Use the token here
+
+    response = client.chat.completions.create(
+        model="meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
+        messages=[{"role": "user", "content": msg}]
+    )
+      
+    ai_output = response.choices[0].message.content
+    print(ai_output)
 
   def explainShift(self, num1, num2, shiftValue, df, character = "Data analyst", mode = "Sarcastic", prompt = "Null"):
     from together import Together
@@ -1035,3 +1131,44 @@ emotionsDict = {
     "Funny": "Use a playful, comedic tone. Imagine you're explaining data to a 5-year-old but with more sarcasm and dad jokes.",
 
   }
+
+
+aboutCorrpy = """
+Corrpy is a Python library to automate correlation analysis across multiple features. It has the following methods:
+
+1. getTotalCorrRelation(df, features = ["Correlation", "Pearson", "Distance"], feature = "Correlation", short = False, prompt = None): Analyze correlation across all columns and get trends, interpretations and score with respect to feature u added in parameter. It returns a pandas DataFrame.
+
+2. getGroupInf(objColumn, numColumn, df, prompt = None): Compute the correlation between the given object column and the given numeric column. It returns a pandas DataFrame.
+
+3. getAllGroupInf(df, prompt = None): Compute the correlation between all object columns and all numeric columns. It returns a pandas DataFrame.
+
+4. setApi(): Securely handles your API token from Together.ai.
+
+5. explainAITC(df, feature="Correlation", character="Data analyst", mode="Confused", prompt = None): Get AI insights for correlation analysis. It returns a pandas DataFrame.
+
+6. shift(num1, num2, shiftValue, df): Test how your dependent variable reacts to small changes in an input variable. It returns a pandas DataFrame.
+
+7. explainShift(num1, num2, shiftValue, df, character = "Data analyst", mode = "Funny...", prompt = None): An AI analyst explains the output of shift() like you're in a meeting with your CEO. It returns a pandas DataFrame.
+
+8. checkTransit(firstFeature, secondFeature, ThirdFeature): Check for transitive correlation between three features. It returns a pandas DataFrame.
+
+9. explainPartialCorrelation(num1, num2, df, character = "Data analyst", mode = "Funny...", prompt = None): Get AI insights for partial correlation analysis. It returns a pandas DataFrame.
+
+10. checkTransitForColumn(column, df): Check for transitive correlation between a column and all other columns. It returns a pandas DataFrame.
+
+11. explainTransitForcolumn(column, df, character = "Data analyst", mode = "Funny...", prompt = None): An AI analyst explains the output of `checkTransitForColumn()` like you're in a meeting with your CEO. It returns a pandas DataFrame.
+
+Corrpy is a Python library that automates correlation analysis across multiple features. It provides simple methods to:
+
+* Get correlation scores between features
+* Get trends and interpretations of correlations
+* Get insights into correlation analysis
+* Test how a dependent variable reacts to small changes in an input variable
+* Check for transitive correlation between three features
+* Get insights into partial correlation analysis
+* Check for transitive correlation between a column and all other columns
+
+Corrpy is built on top of the Together AI library, which provides advanced AI-driven insights into correlation analysis. Corrpy is designed to be easy to use and integrate into existing data science workflows. The library is open source and community-driven, with the goal of making correlation analysis more accessible and understandable to a wider range of users.
+"""
+
+

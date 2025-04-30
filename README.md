@@ -49,7 +49,6 @@ corrpy.getTotalCorrRelation(df)
 
 ### All Methods you can use 
 1. `getTotalCorrRelation(df, features = ["Correlation", "Pearson", "Distance"], feature = "Correlation", short = False)`: Pass a pandas DataFrame to get correlation analysis across all columns and get trends, interpretations and score with respect to feature u added in parameter.
-
 2. `getGroupInf(objColumn, numColumn, df)`: Compute the correlation between the given object column and the given numeric column.
 3. `getAllGroupInf(df)`: Compute the correlation between all object columns and all numeric columns.
 4. `setApi()`: Securely handles your [Together.ai](https://www.together.ai/) API token.
