@@ -1,3 +1,26 @@
+# v 0.3.17
+
+## Added new method `makeReport(method = "null", prompt = "Null", df = None, objColumn = None, numColumn = None, num1 = None, num2 = None, constant = None, firstFeature = None, secondFeature = None, thirdFeature = None, size = "short", column = None)`
+
+```python
+# Add result and prompt and get your result
+  cp.makeReport(method = "totalcorrelation", prompt = "Null", df)
+
+# more methods
+# getGroupInf
+  cp.makeReport(method = "getgroupinf", prompt = "Null", df = df, objColumn = "A", numColumn = "B")
+
+# getAllGroupInf
+  cp.makeReport(method = "getallgroupinf", prompt = "Null", df = df)
+
+# shift
+  cp.makeReport(method = "shift", prompt = "Null", num1 = 1, num2 = 2, constant = 3, df = df)
+
+```
+Revolutionize your data analysis workflow with AI-generated insights!  With `makeReport()`, you can generate a human-like, well-written paragraph suitable for direct pasting into a PowerPoint slide, based on the output of other methods.  It's like having a data science expert on your team, without the need for a team!
+
+
+
 
 # v 0.3.15
 
@@ -25,8 +48,6 @@ For example, if you called `cp.getGroupInf(objColumn, numColumn, df)`, the `resu
 The AI will then generate insights based on this output.
 
 # v 0.3.13
-
-## Added `prompt` parameter in eacy ai method
 
 ## Added `prompt` parameter in eacy ai method
 
