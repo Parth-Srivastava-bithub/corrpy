@@ -1,4 +1,63 @@
 
+# v 0.3.15
+
+## Added new method `explainAI(result, character="Data analyst", mode="Sarcastic", prompt="Null")`
+
+```python
+# Add result and prompt and get your result
+  cp.explainAI(result, character = "Data analyst", mode = "Sarcastic", prompt = "Null")
+
+```
+
+## The `prompt` parameter
+
+The `prompt` parameter allows you to provide your own prompt to the AI to generate insights.  
+This is a powerful feature that lets you control the output of the AI.  
+You can use this to generate insights that are more relevant to your specific use case.
+
+By default, the `prompt` parameter is set to `"Null"`.  
+This means that the AI will generate insights based on the default prompt.  
+However, you can override this by providing your own prompt.  
+
+The `result` parameter is the output of the method that you want the AI to generate insights about.
+
+For example, if you called `cp.getGroupInf(objColumn, numColumn, df)`, the `result` parameter would be the output of the `getGroupInf` method.  
+The AI will then generate insights based on this output.
+
+# v 0.3.13
+
+## Added `prompt` parameter in eacy ai method
+
+## Added `prompt` parameter in eacy ai method
+
+This allows you to provide your own prompt to the AI to generate insights.  
+This is a powerful feature that lets you control the output of the AI.  
+You can use this to generate insights that are more relevant to your specific use case.
+
+Example:
+
+```python
+cp.explainShift("col1", "col2", shift, df, prompt="Explain like obama")
+
+# more methods
+
+cp.explainTransitForColumn(df, prompt = "Explain like alien gonna attack on earth now and you are in hurry")
+
+```
+
+## Or
+
+```python
+
+# A sarcastic manager comparing column shifts
+explainShift("Sales", "Revenue", 2, df, character="Manager", mode="Sarcastic")
+
+# Chandler Bing being confused by outliers
+explainAITC(df, feature="Anomaly", character="Chandler Bing", mode="Confused")
+
+```
+
+
 # v 0.3.11 🚀
 
 ## ✨ What's New

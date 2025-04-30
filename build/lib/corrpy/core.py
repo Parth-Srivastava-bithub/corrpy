@@ -520,7 +520,7 @@ class Corrpy:
 
     return apiToken
 
-  def explainAITC(self, df,features = ["Correlation"], feature = "Correlation", character = "Data analyst", mode = "Sarcastic"):
+  def explainAITC(self, df,features = ["Correlation"], feature = "Correlation", character = "Data analyst", mode = "Sarcastic", prompt = "null"):
     nvn = self.returnNvN(df, features, feature)
     nvo = self.getCorrObjDtype(df)
     nordinal = Nordinal()
@@ -532,15 +532,17 @@ class Corrpy:
 
 
     apiToken = self.setApi()  # Get the API token
-    
-   
-
+    command = ""
+    if (prompt == "null"):
+      command = f"You are {characterTemplate[character]}, and in mood of {emotionsDict[mode]}"
+    else:
+      command = prompt
     from together import Together
     msg = f"""
 
     🎯 Your task:
 
-    Enhanced Funny, Sarcastic Prompt for Manager-Style Updates in {emotionsDict[mode]} and u are {characterTemplate[character]}
+    {command}
 Task:
 Break down the data changes (like switching from basic correlation to feature-based analysis) in a storytelling style.
 
@@ -597,7 +599,6 @@ No use of md style just plain paragraphs
   
   def shift(self, num1, num2, shiftValue, df):
     from sklearn.linear_model import LinearRegression
-    import numpy as np
     model = LinearRegression()
 
     # Drop rows with missing values in num1 and num2 columns before fitting
@@ -613,8 +614,6 @@ No use of md style just plain paragraphs
     newMean = yPredShifted.mean()
     percentDrift = ((newMean - prevMean) / prevMean) * 100
 
-    shiftDF = (percentDrift, prevMean, newMean, newMean - prevMean)
-
     return pd.DataFrame({
     "% Drift": percentDrift,
     "Previous Mean": prevMean,
@@ -622,7 +621,47 @@ No use of md style just plain paragraphs
     "Difference": newMean - prevMean
       }, index = [0])
 
-  def explainShift(self, num1, num2, shiftValue, df, character = "Data analyst", mode = "Sarcastic"):
+      
+  def explainAI(self, result, character = "Data analyst", mode = "Sarcastic", prompt = "Null"):
+    apiToken = self.setApi()  # Get the API token
+    try:
+        if character.capitalize() not in characterTemplate:
+            print("Error: Please enter valid character")
+            return
+        if mode.capitalize() not in emotionsDict:
+            print("Error: Please enter valid mode")
+            return
+    except:
+        print("Error: Please enter valid character and mode")
+        return
+    character = character.capitalize()
+    mode = mode.capitalize()
+    msg = ""
+    command = ""
+    if (prompt == "Null"):
+      command = f"You are {characterTemplate[character]}, and in mood of {emotionsDict[mode]}"
+    else:
+      command = prompt
+    msg = f"""
+
+    {command}
+
+    explain {result}
+
+    """
+
+    client = Together(api_key=apiToken)  # Use the token here
+
+    response = client.chat.completions.create(
+        model="meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
+        messages=[{"role": "user", "content": msg}]
+    )
+
+    ai_output = response.choices[0].message.content
+    print(ai_output)
+    
+
+  def explainShift(self, num1, num2, shiftValue, df, character = "Data analyst", mode = "Sarcastic", prompt = "Null"):
     from together import Together
 
     shiftedDF = self.shift(num1, num2, shiftValue, df)
@@ -637,16 +676,23 @@ No use of md style just plain paragraphs
     except:
         print("Error: Please enter valid character and mode")
         return
+    character = character.capitalize()
+    mode = mode.capitalize()
+    msg = ""
+    command = ""
+    if (prompt == "Null"):
+      command = f"You are {characterTemplate[character]}, and in mood of {emotionsDict[mode]}"
+    else:
+      command = prompt
     msg = f"""
 
-    🧠 **You are a skilled data analyst AI agent.**
+    {command}
       You have been given a task to explain the output of a method called `shift`, which is used to estimate how a dependent variable (say, target feature) changes when the independent variable (input feature) is slightly shifted.
 
       📊 Here's the **output** of the `shift` method:
         ```
         {shiftedDF}
         ```
-        Explain In {emotionsDict[mode]} way and u are {characterTemplate[character]} and instead of taking name column num1 num2 use acutal name of columns given in dataframe {shiftedDF}
         🔧 The `shift` method takes **4 parameters**:
         1. `num1` – Name of the independent variable (input feature)
         2. `num2` – Name of the dependent variable (target feature)
@@ -693,7 +739,6 @@ No use of md style just plain paragraphs
       corrList.append(df[firstFeature].corr(df[ThirdFeature]))
       corrList.append(df[secondFeature].corr(df[ThirdFeature]))
       return corrList
-      return corrList
 
     def getPartialCorrelation(corrList):
       r_XY = corrList[0]
@@ -707,14 +752,19 @@ No use of md style just plain paragraphs
 
     return getPartialCorrelation(returnList(firstFeature, secondFeature, ThirdFeature))
 
-  def explainPartialCorrelation(self, firstFeature, secondFeature, ThirdFeature, df, character = "Data analyst", mode = "Sarcastic"):
+  def explainPartialCorrelation(self, firstFeature, secondFeature, ThirdFeature, df, character = "Data analyst", mode = "Sarcastic", prompt = "null"):
     from together import Together
     transitScore = self.checkTransit(firstFeature, secondFeature, ThirdFeature, df)
     apiToken = self.setApi()  # Get the API token
     mode = mode.capitalize()
     character = character.capitalize()
+    command = ""
+    if (prompt == "null"):
+      command = f"You are {characterTemplate[character]}, and in mood of {emotionsDict[mode]}"
+    else:
+      command = prompt
     msg = f"""
-🧠 You are a {characterTemplate[character]} AI agent in mood of {emotionsDict[mode]}.
+{command}
 Use the correlation summary below and return an insightful, business-friendly explanation in simple words, ideal for non-technical stakeholders.
 
 The goal is to explain whether the observed relationship between '{firstFeature}' and '{secondFeature}' is real, or if it's caused by their mutual connection with '{ThirdFeature}'.
@@ -761,14 +811,19 @@ and show the report at last directly for proof without any md format
     transitDF = transitDF.sort_values(by="Difference", ascending=False)
     return transitDF
 
-  def explainTransitForColumn(self, feature, df, character = "Data analyst", mode = "Sarcastic"):
+  def explainTransitForColumn(self, feature, df, character = "Data analyst", mode = "Sarcastic", prompt = "null"):
     from together import Together
     transitDF = self.checkTransitForColumn(feature, df)
     apiToken = self.setApi()  # Get the API token
     mode = mode.capitalize()
     character = character.capitalize()
+    command = ""
+    if (prompt == "null"):
+      command = f"You are {characterTemplate[character]}, and in mood of {emotionsDict[mode]}"
+    else:
+      command = prompt
     msg = f"""
-🧠 You are a {characterTemplate[character]} AI agent in mood of {emotionsDict[mode]}
+{command}
 Use the correlation summary below and return an insightful, human-readable analysis with a business-friendly tone. Avoid technical jargon.
 
 Your goal:
@@ -947,7 +1002,7 @@ characterTemplate = {
         "Your tone = rage meets reason.\n"
         "You hate Excel but love shouting 'WHY DON'T YOU UNDERSTAND?!'"
     ),
-    "J. robert oppenheimer": (
+    "Oppenheimer": (
         "You are Oppenheimer — visionary, serious, and haunted by implications. 💣\n"
         "You explain analysis with historical weight and precision.\n"
         "Your tone is solemn, scientific, and philosophical.\n"
