@@ -689,6 +689,7 @@ No use of md style just plain paragraphs
 Generate a human-like, well-written paragraph suitable for direct pasting into a PowerPoint slide. Avoid markdown, bullet points, or formatting—just plain, presentation-friendly text that sounds natural and engaging
 size should be {size}
 {prompt_tweak}
+answer while breaking the lines, dont give one loooong line answer 
         """
 
     elif method == "getgroupinf":
@@ -700,6 +701,7 @@ Generate a human-like, well-written paragraph suitable for direct pasting into a
 size should be {size}
 this report is about how each category affects correlation in categorical/object column with respect to numerical column.
 {prompt_tweak}
+answer while breaking the lines, dont give one loooong line answer 
         """
 
     elif method == "getallgroupinf":
@@ -711,6 +713,7 @@ Generate a human-like, well-written paragraph suitable for direct pasting into a
 size should be {size}
 This report is about how each category affects correlation in all object columns (except datetime/numerical) with respect to numerical columns.
 {prompt_tweak}
+answer while breaking the lines, dont give one loooong line answer 
         """
 
     elif method == "shift":
@@ -722,6 +725,7 @@ Generate a human-like, well-written paragraph suitable for direct pasting into a
 size should be {size}
 This report shows how much the dependent variable (target = {target}) changes when the independent variable (feature = {feature}) is shifted by a certain percentage.
 {prompt_tweak}
+answer while breaking the lines, dont give one loooong line answer 
         """
 
     elif method == "checktransit":
@@ -733,6 +737,7 @@ Generate a human-like, well-written paragraph suitable for direct pasting into a
 size should be {size}
 The transitive relationship is where a correlation between two variables exists due to a third variable. This result includes correlations between {first}-{second}, {first}-{third}, and {second}-{third}.
 {prompt_tweak}
+answer while breaking the lines, dont give one loooong line answer 
         """
 
     elif method == "checktransitforcolumn":
@@ -744,6 +749,7 @@ Generate a human-like, well-written paragraph suitable for direct pasting into a
 size should be {size}
 This report shows all transitive/non-transitive relationships of '{column}' with other columns based on correlation.
 {prompt_tweak}
+answer while breaking the lines, dont give one loooong line answer 
         """
 
     else:

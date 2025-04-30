@@ -1,4 +1,4 @@
-# v 0.3.18
+# v 0.4.0
 
 #### ✅ Simplified Parameters in `makeReport()`  
 No more confusing method-specific params! We’ve cleaned it up so you can use a few **generalized** ones across all report types:
