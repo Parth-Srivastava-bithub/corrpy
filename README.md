@@ -47,22 +47,26 @@ corrpy.getTotalCorrRelation(df)
 
 ---
 
-### All Methods you can use 
+### Methods
+
 1. `getTotalCorrRelation(df, features = ["Correlation", "Pearson", "Distance"], feature = "Correlation", short = False)`: Pass a pandas DataFrame to get correlation analysis across all columns and get trends, interpretations and score with respect to feature u added in parameter.
 2. `getGroupInf(objColumn, numColumn, df)`: Compute the correlation between the given object column and the given numeric column.
 3. `getAllGroupInf(df)`: Compute the correlation between all object columns and all numeric columns.
 4. `setApi()`: Securely handles your [Together.ai](https://www.together.ai/) API token.
-5. `explainAITC(df, feature="Correlation", character="Data analyst", mode="Confused")`: Get AI insights for correlation analysis.
-6. `shift(num1, num2, shiftValue, df)`: Test how your dependent variable reacts to small changes in an input variable.
-7. `explainShift(num1, num2, shiftValue, df, character = "Data analyst", mode = "Funny...", prompt = "Explain like a stand-up comedian")`: An AI analyst explains the output of `shift()` like you're in a meeting with your CEO.
-8. `checkTransit(firstFeature, secondFeature, ThirdFeature)`: Check for transitive correlation between three features.
-9. `explainPartialCorrelation(num1, num2, df, character = "Data analyst", mode = "Funny...", prompt = "Explain like Angry Professor")`: Get AI insights for partial correlation analysis.
-10. `checkTransitForColumn(column, df)`: Check for transitive correlation between a column and all other columns.
-11. `explainTransitForcolumn(column, df, character = "Data analyst", mode = "Funny...", prompt = "Explain like Oppenheimer")`: An AI analyst explains the output of `checkTransitForColumn()` like you're in a meeting with your CEO.
-12. `explainAI(result, character = "Data analyst", mode = "Funny...", prompt = "Explain like angry professor")`: Get AI insights for any result.
-13. `makeReport(self, method="null", df=None, column=None, feature=None, target=None, prompt="Null", size="short", constant=None, first=None, second=None, third=None)`: Generate a human-like, well-written paragraph suitable for direct pasting into a PowerPoint slide, based on the output of other methods.
+5. `checkTransit(firstFeature, secondFeature, ThirdFeature)`: Check for transitive correlation between three features.
+6. `checkTransitForColumn(column, df)`: Check for transitive correlation between a column and all other columns.
+7. `makeReport(self, method="null", df=None, column=None, feature=None, target=None, prompt="Null", size="short", constant=None, first=None, second=None, third=None)`: Generate a human-like, well-written paragraph suitable for direct pasting into a PowerPoint slide, based on the output of other methods.
+
+### AI-Generated Insights
+
+1. `explainAITC(df, feature="Correlation", character="Data analyst", mode="Confused")`: Get AI insights for correlation analysis.
+2. `explainShift(num1, num2, shiftValue, df, character = "Data analyst", mode = "Funny...", prompt = "Explain like a stand-up comedian")`: An AI analyst explains the output of `shift()` like you're in a meeting with your CEO.
+3. `explainPartialCorrelation(num1, num2, df, character = "Data analyst", mode = "Funny...", prompt = "Explain like Angry Professor")`: Get AI insights for partial correlation analysis.
+4. `explainTransitForcolumn(column, df, character = "Data analyst", mode = "Funny...", prompt = "Explain like Oppenheimer")`: An AI analyst explains the output of `checkTransitForColumn()` like you're in a meeting with your CEO.
+5. `explainAI(result, character = "Data analyst", mode = "Funny...", prompt = "Explain like angry professor")`: Get AI insights for any result.
 
 ---
+
 
 ## 👤 Available Characters
 
