@@ -55,7 +55,7 @@ corrpy.getTotalCorrRelation(df)
 4. `setApi()`: Securely handles your [Together.ai](https://www.together.ai/) API token.
 5. `checkTransit(firstFeature, secondFeature, ThirdFeature)`: Check for transitive correlation between three features.
 6. `checkTransitForColumn(column, df)`: Check for transitive correlation between a column and all other columns.
-7. `makeReport(self, method="null", df=None, column=None, feature=None, target=None, prompt="Null", size="short", constant=None, first=None, second=None, third=None)`: Generate a human-like, well-written paragraph suitable for direct pasting into a PowerPoint slide, based on the output of other methods.
+
 
 ### AI-Generated Insights
 
@@ -64,7 +64,7 @@ corrpy.getTotalCorrRelation(df)
 3. `explainPartialCorrelation(num1, num2, df, character = "Data analyst", mode = "Funny...", prompt = "Explain like Angry Professor")`: Get AI insights for partial correlation analysis.
 4. `explainTransitForcolumn(column, df, character = "Data analyst", mode = "Funny...", prompt = "Explain like Oppenheimer")`: An AI analyst explains the output of `checkTransitForColumn()` like you're in a meeting with your CEO.
 5. `explainAI(result, character = "Data analyst", mode = "Funny...", prompt = "Explain like angry professor")`: Get AI insights for any result.
-
+6. `makeReport(self, method="null", df=None, column=None, feature=None, target=None, prompt="Null", size="short", constant=None, first=None, second=None, third=None)`: Generate a human-like, well-written paragraph suitable for direct pasting into a PowerPoint slide, based on the output of other methods.
 ---
 
 
