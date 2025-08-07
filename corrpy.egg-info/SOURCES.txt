@@ -1,5 +1,5 @@
 README.md
-setup.py
+pyproject.toml
 Corrpy.egg-info/PKG-INFO
 Corrpy.egg-info/SOURCES.txt
 Corrpy.egg-info/dependency_links.txt

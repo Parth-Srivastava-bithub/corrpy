@@ -1,0 +1,26 @@
+[project]
+name = "Corrpy"
+version = "0.4.11"
+description = "Correlation analysis tool with smart interpretation"
+readme = "README.md"
+requires-python = ">=3.7"
+license = { text = "BSD-3-Clause" }
+authors = [
+  { name = "YellowForest" }
+]
+dependencies = [
+  "pandas",
+  "numpy",
+  "scipy",
+  "matplotlib",
+  "seaborn",
+  "IPython",
+  "together",
+  "scikit-learn"
+]
+
+[project.urls]
+Homepage = "https://github.com/Parthdsaiml/corrpy"
+
+[tool.setuptools.packages.find]
+where = ["."]

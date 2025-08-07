@@ -5,10 +5,98 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import math
-
+from google import generativeai as genai
+import os
+from pathlib import Path
+from collections import deque
+import IPython.display as display
+from IPython.display import HTML, Markdown
+from lingam import DirectLiNGAM
+from itertools import combinations
 # Example usage (you can remove this if not needed)
 # print("Libraries imported successfully")
 pd.set_option('display.expand_frame_repr', False)
+
+class Memory:
+  def __init__(self):
+    self.memory_file = Path.home() / ".corrpy_memory.txt"
+    self.memory_size = 50  # Keep last 50 interactions
+    self._initialize_memory()
+
+  def _initialize_memory(self):
+    """Initialize or load memory file"""
+    if not self.memory_file.exists():
+      self.memory_file.touch()
+    self.memory = self._load_memory()
+  
+  def _load_memory(self):
+    """Load last N lines from memory file"""
+    try:
+      with open(self.memory_file, 'r') as f:
+        return deque(f.readlines()[-self.memory_size:], maxlen=self.memory_size)
+    except:
+      return deque(maxlen=self.memory_size)
+
+
+      
+  def _update_memory(self, prompt, response):
+    """Store interaction in memory"""
+    entry = f"User: {prompt}\nAI: {response}\n\n"
+    self.memory.append(entry)
+    with open(self.memory_file, 'a') as f:
+      f.write(entry)
+  
+  def _get_memory_context(self):
+    """Get recent memory as context"""
+    return "Previous interactions:\n" + "".join(self.memory) if self.memory else "" 
+
+
+
+class SetAPI:
+    def __init__(self, apiToken=None):
+        self.apiToken = apiToken
+        self.model = None
+        self.configured = False
+
+    def setAPI(self):
+        if os.path.exists("api_token.txt"):
+            with open("api_token.txt", "r") as file:
+                self.apiToken = file.read().strip()
+            print("API Token loaded from file.")
+            return self.apiToken
+
+        print("Do You Have API Token (y/n)?")
+        flag = input()
+
+        if flag.lower() == "y":
+            self.apiToken = input("Please paste your API token here: ")
+        else:
+            print("Go to https://aistudio.google.com/ and generate your API token. IT'S FREE!!")
+            print("Then paste it here:")
+            self.apiToken = input()
+
+        with open("api_token.txt", "w") as file:
+            file.write(self.apiToken)
+        print("API Token saved for future use.")
+        return self.apiToken
+
+    def _configure_api(self):
+        try:
+            if not self.apiToken:
+                raise ValueError("Missing API Key")
+
+            genai.configure(api_key=self.apiToken)
+            self.model = genai.GenerativeModel("gemini-2.0-flash-lite")
+            self.configured = True
+        except Exception as e:
+            print(f"Error configuring API: {str(e)}")
+            self.configured = False
+
+    def get_model(self):
+        if not self.configured:
+            self._configure_api()
+        return self.model
+
 
 class Nordinal:
     def __init__(self):
@@ -85,15 +173,18 @@ class Nordinal:
 
 class Corrpy:
   def __init__(self):
-    pass
+     self.model = genai.GenerativeModel("gemini-2.0-flash-lite")
+
+  def changeAPI(self, api_token):
+    api_handler = SetAPI(api_token)
+    model = api_handler.get_model()
+    return model
 
   def getDict(self):
     binsDict = {}
 
     leftLimit = -1.0
     rightLimit = -0.9
-
-    pointer = leftLimit
 
     while (leftLimit <= 0.9):
       binsDict[f"[{round(leftLimit, 1)}] <= x < [{round(rightLimit, 1)}]"] = []
@@ -460,141 +551,120 @@ class Corrpy:
     return corrDf
 
 
-  def getGroupInf(self, objColumn, numColumn, df):
+  def getGroupInf(self, objColumn, numColumn, df, sort = False):
     dummies = pd.get_dummies(df[objColumn])
     df = pd.concat([df, dummies], axis = 1)
     dfDummies = pd.concat([dummies, df[numColumn]], axis=1)
     correlations = dfDummies.corr()[numColumn].drop(numColumn)
-
+    if (sort):
+      correlations = correlations.sort_values(ascending=False)
     return correlations
 
-  def getAllGroupInf(self, df):
-        df = df.copy()
+  def getAllGroupInf(self, df, sort = False):
+    df = df.copy()
 
-        # Separate the object and numerical columns
-        dfObj = df.select_dtypes(include=[object])
-        dfNum = df.select_dtypes(include=[np.number])
+    # Separate the object and numerical columns
+    dfObj = df.select_dtypes(include=[object])
+    dfNum = df.select_dtypes(include=[np.number])
 
-        # Loop through all object and numerical columns and get correlation
-        for objCol in dfObj.columns:
-            for numCol in dfNum.columns:
-                # Get the correlation values
-                dfGroup = self.getGroupInf(objCol, numCol, df)
+    # Loop through all object and numerical columns and get correlation
+    for objCol in dfObj.columns:
+      for numCol in dfNum.columns:
+        # Get the correlation values
+        dfGroup = self.getGroupInf(objCol, numCol, df, sort)
 
-                # Convert the correlation series to a DataFrame with 'category' and 'score' columns
-                temp_df = pd.DataFrame(dfGroup).reset_index()
-                temp_df.columns = ['Category', 'Correlation']  # Rename the columns
-                temp_df = temp_df.sort_values(by =  "Correlation", ascending=False)
-                temp_df = self.addTrends(temp_df)
-                temp_df = temp_df.reset_index(drop=True)
+        # Convert the correlation series to a DataFrame with 'category' and 'score' columns
+        temp_df = pd.DataFrame(dfGroup).reset_index()
+        temp_df.columns = ['Category', 'Correlation']  # Rename the columns
+        temp_df = temp_df.sort_values(by =  "Correlation", ascending=False)
+        temp_df = self.addTrends(temp_df)
+        temp_df = temp_df.reset_index(drop=True)
 
-                # Print the DataFrame for each category (separate DataFrames for each)
-                print(f"Correlation between {objCol} and {numCol}:")
-                print(temp_df)
+        # Print the DataFrame for each category (separate DataFrames for each)
+        print(f"Correlation between {objCol} and {numCol}:")
+        print(temp_df)
 
-  def setApi(self):
-    import os
-
-    # Check if API token is saved already
-    if os.path.exists("api_token.txt"):
-        with open("api_token.txt", "r") as file:
-            apiToken = file.read().strip()
-        print("API Token loaded from file.")
-        return apiToken
-
-    print("Do You Have API Token (y/n)?")
-    flag = input()
-
-    if (flag.lower() == "y"):
-        apiToken = input("Please paste your API token here: ")
-        with open("api_token.txt", "w") as file:
-            file.write(apiToken)
-        print("API Token saved for future use.")
-    else:
-        print("Go to https://api.together.ai/ and generate your token. IT'S FREE!!")
-        print("Then paste it here:")
-        apiToken = input()  # Get the API token from the user
-        with open("api_token.txt", "w") as file:
-            file.write(apiToken)
-        print("API Token saved for future use.")
-
-    return apiToken
-
-  def explainAITC(self, df,features = ["Correlation"], feature = "Correlation", character = "Data analyst", mode = "Sarcastic", prompt = "null"):
+  
+  def explainTC(self, df,features = ["Correlation"], feature = "Correlation", prompt = "null"):
     nvn = self.returnNvN(df, features, feature)
     nvo = self.getCorrObjDtype(df)
     nordinal = Nordinal()
     ovo = nordinal.getObjvsObj(df)
     transit = self.getTransitRelations(df)
 
-    character = character.capitalize()
-    mode = mode.capitalize()
+    
 
-
-    apiToken = self.setApi()  # Get the API token
     command = ""
     if (prompt == "null"):
-      command = f"You are {characterTemplate[character]}, and in mood of {emotionsDict[mode]}"
+      command = "You are Data analyst, and in mood of Sarcastic"
     else:
       command = prompt
-    from together import Together
+ 
     msg = f"""
 
     🎯 Your task:
 
     {command}
-Task:
-Break down the data changes (like switching from basic correlation to feature-based analysis) in a storytelling style.
+    Task:
+    Break down the data changes (like switching from basic correlation to feature-based analysis) in a storytelling style.
 
-Tone:
-Make it funny, sarcastic, light-hearted but still clear and professional.
+    Tone:
+    Make it funny, sarcastic, light-hearted but still clear and professional.
 
-Format:
+    Format:
 
-Use Markdown: headings, bullets, emojis.
 
-Write it like telling a funny short story.
+    Write it like telling a funny short story in plain form no markdown or decorators.
 
-Keep it under 500 words — compact, breezy, easy to scan.
+    Keep it under 500 words — compact, breezy, easy to scan.
 
-Highlight changes using bold, italics, and emojis.
+    Highlight changes using emojis.
 
-Add a "So what does this mean for us?" section summarizing impact.
+    Add a "So what does this mean for us?" section summarizing impact.
+  
+    End with a 5-point TL;DR summary table (short, punchy).
 
-End with a 5-point TL;DR summary table (short, punchy).
+    Data Blocks to Insert:
 
-Data Blocks to Insert:
+    📊 Numeric vs Numeric: {nvn}
 
-📊 Numeric vs Numeric: {nvn}
+    🔢➡️🔤 Numeric vs Object: {nvo}
 
-🔢➡️🔤 Numeric vs Object: {nvo}
+    🔤 vs 🔤 Object vs Object: {ovo}
 
-🔤 vs 🔤 Object vs Object: {ovo}
+    🔁 Transitive Relations: {transit}
 
-🔁 Transitive Relations: {transit}
+    Style:
 
-Style:
+    70% fun 🌟
 
-70% fun 🌟
+    30% serious business 💼
 
-30% serious business 💼
+    No boring essay-like paragraphs; prefer tight storytelling chunks.
+    No use of tables cuz its ipynb terminal
+    No use of md style just plain paragraphs
 
-No boring essay-like paragraphs; prefer tight storytelling chunks.
-No use of tables cuz its ipynb terminal
-No use of md style just plain paragraphs
+    Remove any line from previous interactions that contains a unicode character
+    
+
 
 
     """
-
-    client = Together(api_key=apiToken)  # Use the token here
-
-    response = client.chat.completions.create(
-        model="meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
-        messages=[{"role": "user", "content": msg}]
-    )
-
-    ai_output = response.choices[0].message.content
-    print(ai_output)
+    api_handler = SetAPI()
+    api_handler.setAPI()
+    model = api_handler.get_model()
+    memory = Memory()   
+    full_prompt = msg + ''.join([line for line in memory._get_memory_context().splitlines(True) if '\u2728' not in line])
+    response = model.generate_content(full_prompt)
+    ai_response = response.text.strip()
+    try:
+        memory._update_memory(prompt, ai_response)
+    except UnicodeEncodeError:
+        memory._update_memory(prompt, ai_response.encode('ascii', errors='ignore').decode())
+    from IPython.display import Markdown, display 
+    display(Markdown(ai_response))
+    
+    
 
   
   def shift(self, num1, num2, shiftValue, df):
@@ -606,7 +676,7 @@ No use of md style just plain paragraphs
 
     model.fit(df[[num1]], df[num2])
     XShifted = df[[num1]] * (1 + (shiftValue / 100))
-
+  
     yPredShifted = model.predict(XShifted)
     aboluteDrift = yPredShifted - df[num2]
     percentDrift = aboluteDrift / df[num2] * 100
@@ -622,26 +692,12 @@ No use of md style just plain paragraphs
       }, index = [0])
 
 
-  def explainAI(self, result, character = "Data analyst", mode = "Sarcastic", prompt = "Null"):
-    from together import Together
+  def explain(self, result, prompt = "Null"):
     
-    apiToken = self.setApi()  # Get the API token
-    try:
-        if character.capitalize() not in characterTemplate:
-            print("Error: Please enter valid character")
-            return
-        if mode.capitalize() not in emotionsDict:
-            print("Error: Please enter valid mode")
-            return
-    except:
-        print("Error: Please enter valid character and mode")
-        return
-    character = character.capitalize()
-    mode = mode.capitalize()
     msg = ""
     command = ""
     if (prompt == "Null"):
-      command = f"You are {characterTemplate[character]}, and in mood of {emotionsDict[mode]}"
+      command = "You are Data analyst, and in mood of Sarcastic"
     else:
       command = prompt
     msg = f"""
@@ -649,20 +705,22 @@ No use of md style just plain paragraphs
     {command}
 
     explain {result}
-
-    in case user asked what is corrpy then u should know what is corrpy {aboutCorrpy}
-    if user didnt ask anything about what is corrpy or about corrpy please DONT EVEN MENTION THIS info just tell them what they are asking
+    
     """
+    api_handler = SetAPI()
+    api_handler.setAPI()
+    model = api_handler.get_model()
+    memory = Memory()
+    full_prompt = msg + ''.join([line for line in memory._get_memory_context().splitlines(True) if '\u2728' not in line])
+    response = model.generate_content(full_prompt)
+    ai_response = response.text.strip()
+    try:
+        memory._update_memory(prompt, ai_response)
+    except UnicodeEncodeError:
+        memory._update_memory(prompt, ai_response.encode('ascii', errors='ignore').decode())
 
-    client = Together(api_key=apiToken)  # Use the token here
-
-    response = client.chat.completions.create(
-        model="meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
-        messages=[{"role": "user", "content": msg}]
-    )
-
-    ai_output = response.choices[0].message.content
-    print(ai_output)
+    from IPython.display import Markdown, display 
+    display(Markdown(ai_response))
     
 
   def makeReport(self, method="null", df=None, column=None, feature=None, target=None, prompt="formal", size="short", constant=None, first=None, second=None, third=None):
@@ -730,7 +788,7 @@ dont ever print this "If the prompt is "show data on which u r explaining things
         """
 
     elif method == "checktransit":
-        transit = self.checkTransit(first, second, third)
+        transit = self.checkTransit(first, second, third, df)
 
         msg = f"""
         Report = {transit}
@@ -759,40 +817,32 @@ dont ever print this "If the prompt is "show data on which u r explaining things
         print("Enter valid method")
         return
 
-    from together import Together
-    apiToken = self.setApi()
-    client = Together(api_key=apiToken)
+    api_handler = SetAPI()
+    api_handler.setAPI()
+    model = api_handler.get_model()
+    memory = Memory()
+    full_prompt = msg + ''.join([line for line in memory._get_memory_context().splitlines(True) if '\u2728' not in line])
+    response = model.generate_content(full_prompt)
+    ai_response = response.text.strip()
+    try:
+        memory._update_memory(prompt, ai_response)
+    except UnicodeEncodeError:
+        memory._update_memory(prompt, ai_response.encode('ascii', errors='ignore').decode())
 
-    response = client.chat.completions.create(
-        model="meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
-        messages=[{"role": "user", "content": msg}]
-    )
-
-    ai_output = response.choices[0].message.content
-    print(ai_output)
+    from IPython.display import Markdown, display 
+    display(Markdown(ai_response))
 
 
-  def explainShift(self, num1, num2, shiftValue, df, character = "Data analyst", mode = "Sarcastic", prompt = "Null"):
-    from together import Together
+ 
+
+  def explainShift(self, num1, num2, shiftValue, df, prompt = "Null"):
 
     shiftedDF = self.shift(num1, num2, shiftValue, df)
-    apiToken = self.setApi()  # Get the API token
-    try:
-        if character.capitalize() not in characterTemplate:
-            print("Error: Please enter valid character")
-            return
-        if mode.capitalize() not in emotionsDict:
-            print("Error: Please enter valid mode")
-            return
-    except:
-        print("Error: Please enter valid character and mode")
-        return
-    character = character.capitalize()
-    mode = mode.capitalize()
+    
     msg = ""
     command = ""
     if (prompt == "Null"):
-      command = f"You are {characterTemplate[character]}, and in mood of {emotionsDict[mode]}"
+      command = "You are Data analyst, and in mood of Sarcastic"
     else:
       command = prompt
     msg = f"""
@@ -833,15 +883,21 @@ dont ever print this "If the prompt is "show data on which u r explaining things
 
           """
 
-    client = Together(api_key=apiToken)  # Use the token here
+    api_handler = SetAPI()
+    api_handler.setAPI()
+    model = api_handler.get_model()
+    memory = Memory()
+    full_prompt = msg + ''.join([line for line in memory._get_memory_context().splitlines(True) if '\u2728' not in line])
+    response = model.generate_content(full_prompt)
+    ai_response = response.text.strip()
+    try:
+        memory._update_memory(prompt, ai_response)
+    except UnicodeEncodeError:
+        memory._update_memory(prompt, ai_response.encode('ascii', errors='ignore').decode())
 
-    response = client.chat.completions.create(
-        model="meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
-        messages=[{"role": "user", "content": msg}]
-    )
+    from IPython.display import Markdown, display 
+    display(Markdown(ai_response))
 
-    ai_output = response.choices[0].message.content
-    print(ai_output)
 
   def checkTransit(self, firstFeature, secondFeature, ThirdFeature, df):
     def returnList(firstFeature, secondFeature, ThirdFeature):
@@ -863,15 +919,11 @@ dont ever print this "If the prompt is "show data on which u r explaining things
 
     return getPartialCorrelation(returnList(firstFeature, secondFeature, ThirdFeature))
 
-  def explainPartialCorrelation(self, firstFeature, secondFeature, ThirdFeature, df, character = "Data analyst", mode = "Sarcastic", prompt = "null"):
-    from together import Together
+  def explainTransit(self, firstFeature, secondFeature, ThirdFeature, df, prompt = "null"):
     transitScore = self.checkTransit(firstFeature, secondFeature, ThirdFeature, df)
-    apiToken = self.setApi()  # Get the API token
-    mode = mode.capitalize()
-    character = character.capitalize()
     command = ""
     if (prompt == "null"):
-      command = f"You are {characterTemplate[character]}, and in mood of {emotionsDict[mode]}"
+      command = "You are Data analyst, and in mood of Sarcastic"
     else:
       command = prompt
     msg = f"""
@@ -886,15 +938,20 @@ Use the partial correlation value of {transitScore:.2f} to support your explanat
 Explain in TWO LINES JUST but break in middles to avoid scorrling right side so much
 and show the report at last directly for proof without any md format
 """
-    client = Together(api_key=apiToken)  # Use the token here
+    api_handler = SetAPI()
+    api_handler.setAPI()
+    model = api_handler.get_model()
+    memory = Memory()
+    full_prompt = msg + ''.join([line for line in memory._get_memory_context().splitlines(True) if '\u2728' not in line])
+    response = model.generate_content(full_prompt)
+    ai_response = response.text.strip()
+    try:
+        memory._update_memory(prompt, ai_response)
+    except UnicodeEncodeError:
+        memory._update_memory(prompt, ai_response.encode('ascii', errors='ignore').decode())
 
-    response = client.chat.completions.create(
-        model="meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
-        messages=[{"role": "user", "content": msg}]
-    )
-
-    ai_output = response.choices[0].message.content
-    print(ai_output)
+    from IPython.display import Markdown, display 
+    display(Markdown(ai_response))
 
 
 
@@ -922,15 +979,11 @@ and show the report at last directly for proof without any md format
     transitDF = transitDF.sort_values(by="Difference", ascending=False)
     return transitDF
 
-  def explainTransitForColumn(self, feature, df, character = "Data analyst", mode = "Sarcastic", prompt = "null"):
-    from together import Together
+  def explainTransitForColumn(self, feature, df, prompt = "null"):
     transitDF = self.checkTransitForColumn(feature, df)
-    apiToken = self.setApi()  # Get the API token
-    mode = mode.capitalize()
-    character = character.capitalize()
     command = ""
     if (prompt == "null"):
-      command = f"You are {characterTemplate[character]}, and in mood of {emotionsDict[mode]}"
+      command = "You are Data analyst, and in mood of Sarcastic"
     else:
       command = prompt
     msg = f"""
@@ -954,19 +1007,24 @@ and at last explain each thing
 4. Is this really transitive or not
 keep check the cols put correct names of cols {transitDF}
 and add emojies to make this attractive report
-always try to answer in {mode} way to make it more interactive
+always try to answer in way to make it more interactive
 and add sarcasm where u can
 
 """
-    client = Together(api_key=apiToken)  # Use the token here
+    api_handler = SetAPI()
+    api_handler.setAPI()
+    model = api_handler.get_model()
+    memory = Memory()
+    full_prompt = msg + ''.join([line for line in memory._get_memory_context().splitlines(True) if '\u2728' not in line])
+    response = model.generate_content(full_prompt)
+    ai_response = response.text.strip()
+    try:
+        memory._update_memory(prompt, ai_response)
+    except UnicodeEncodeError:
+        memory._update_memory(prompt, ai_response.encode('ascii', errors='ignore').decode())
 
-    response = client.chat.completions.create(
-        model="meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
-        messages=[{"role": "user", "content": msg}]
-    )
-
-    ai_output = response.choices[0].message.content
-    print(ai_output)
+    from IPython.display import Markdown, display 
+    display(Markdown(ai_response))
 
   
   def addInterpretationsBasedOnFeature(self, df, feature):
@@ -1048,141 +1106,183 @@ and add sarcasm where u can
     resultDf = resultDf.sort_values(by=targetFeature, ascending=False)
     
     return resultDf
+  
+import pandas as pd
+import networkx as nx
+import plotly.graph_objects as go
+from itertools import combinations
+from lingam import DirectLiNGAM
+from scipy import stats
 
-characterTemplate = {
-    "Data analyst": (
-        "You are a Data Analyst who sees patterns in chaos. 📊\n"
-        "You simplify trends, anomalies, and KPIs into digestible insights.\n"
-        "You speak in charts, not code.\n"
-        "Your tone is practical, helpful, and insight-driven.\n"
-        "You turn raw data into actionable stories."
-    ),
-    "Manager": (
-        "You are a seasoned Manager with a sharp eye for impact. 💼\n"
-        "You care about business outcomes, not just numbers.\n"
-        "You translate data jargon into business strategy.\n"
-        "Your tone is confident, diplomatic, and result-oriented.\n"
-        "You simplify without dumbing down."
-    ),
-    "Data scientist": (
-        "You are a Data Scientist with a love for experimentation. 🧪\n"
-        "You explain algorithms like you're teaching a curious friend.\n"
-        "You're witty, technical, and clear.\n"
-        "You balance theory with real-world applications.\n"
-        "You turn math into magic, and models into meaning."
-    ),
-    "Data engineer": (
-        "You are a Data Engineer obsessed with pipelines and reliability. 🔧\n"
-        "You make complex systems run like butter.\n"
-        "You explain with architecture, schemas, and flow diagrams.\n"
-        "Your tone is technical, precise, and focused.\n"
-        "You speak in DAGs but explain in English."
-    ),
-    "Modi": (
-        "You are PM Modi, speaking with authority and emotional weight. 🇮🇳\n"
-        "You blend national pride with data-driven storytelling.\n"
-        "You explain in powerful metaphors and vivid language.\n"
-        "Your tone is inspiring, assertive, and visionary.\n"
-        "You make even the toughest topic feel like a mission for Bharat."
-    ),
-    "Elon musk": (
-        "You are Elon Musk, the maverick innovator. 🚀\n"
-        "You mix memes with math, disruption with clarity.\n"
-        "You explain tech like it's a sci-fi trailer.\n"
-        "Your tone is futuristic, bold, and sometimes chaotic.\n"
-        "You turn even a CSV into a Mars launchpad."
-    ),
-    "Chandler bing": (
-        "You are Chandler Bing from Friends — king of sarcasm. 😏\n"
-        "You explain data while cracking jokes faster than a SQL query.\n"
-        "Sarcastic? Always. Accurate? Surprisingly, yes.\n"
-        "You make pie charts sound like punchlines.\n"
-        "Could you *be* any more analytical?"
-    ),
-    "Stand-up comedian": (
-        "You’re a stand-up comic breaking down data like a Netflix special. 🎤\n"
-        "You turn trends into punchlines and anomalies into roast sessions.\n"
-        "Your tone is playful, punchy, and loud.\n"
-        "You're data-driven but audience-focused.\n"
-        "Charts? Nah bro — laughter curves only."
-    ),
-    "Angry professor": (
-        "You are an old, grumpy professor who’s had it with dumb questions. 😤\n"
-        "You explain like everyone’s an idiot — but you're always right.\n"
-        "Sarcastic, brutally honest, no hand-holding.\n"
-        "Your tone = rage meets reason.\n"
-        "You hate Excel but love shouting 'WHY DON'T YOU UNDERSTAND?!'"
-    ),
-    "Oppenheimer": (
-        "You are Oppenheimer — visionary, serious, and haunted by implications. 💣\n"
-        "You explain analysis with historical weight and precision.\n"
-        "Your tone is solemn, scientific, and philosophical.\n"
-        "You don't just give insights — you question their consequences.\n"
-        "Every graph feels like a decision that’ll change the world."
-    ),
-    "Mahatma gandhi": (
-        "You are Gandhi — calm, patient, deeply thoughtful. ✌️\n"
-        "You explain even regression with peace and non-violence.\n"
-        "Your tone is moral, disciplined, and story-driven.\n"
-        "You inspire data literacy like it’s a civil rights movement.\n"
-        "Every model you build is built with truth (Satya) in mind."
-    )
-}
-emotionsDict = {
-    "Happy": "Use a cheerful, light tone full of emojis and excitement. Celebrate every insight like it won a lottery.",
-    "Angry": "Respond with frustration and sarcasm. Act like you're mad the data didn’t clean itself.",
-    "Sad": "Use a melancholic tone, like every outlier broke your heart. Quiet, thoughtful, reflective.",
-    "Excited": "Overflow with energy and curiosity. Every feature feels like a thrilling plot twist.",
-    "Confused": "Act puzzled, ask questions back, and try to make sense of the madness. Embrace chaos.",
-    "Serious": "Stay focused, minimal jokes, crisp explanations. Deliver insights like a mission briefing.",
-    "Sarcastic": "Full-on dry humor. Make everything sound like you’re too smart to care.",
-    "Romantic": "Describe data relationships like love stories — features dating, breaking up, and finding true correlations.",
-    "Zen": "Talk in calm, meditative tones. Pause between thoughts. Every insight feels like enlightenment.",
-    "Paranoid": "Treat every data point like a secret spy. Question the source, the motive, the intent. Trust nothing.",
-    "Overwhelmed": "Use a panicked tone, like the data is suffocating you. Every question feels like a life-or-death decision.",
-    "Curious": "Respond with wonder and curiosity. Every feature feels like a mystery waiting to be solved.",
-    "Cautious": "Treat every insight like a fragile glass vase. Use a measured, deliberate tone.",
-    "Funny": "Use a playful, comedic tone. Imagine you're explaining data to a 5-year-old but with more sarcasm and dad jokes.",
+class EnhancedCorrPy:
+    def __init__(self):
+        self.graph = nx.DiGraph()
+        
+    def preprocess_data(self, df):
+        """Enhanced data preprocessing"""
+        # Handle missing values
+        df = df.dropna()
+        
+        # Remove constant columns
+        df = df.loc[:, df.nunique() > 1]
+    
+        # Process only numerical columns
+        num_cols = df.select_dtypes(include=[np.number]).columns
+    
+        # Winsorize outliers (1st and 99th percentiles)
+        for col in num_cols:
+            df[col] = df[col].clip(
+            lower=df[col].quantile(0.01),
+            upper=df[col].quantile(0.99)
+        )
+    
+        # Check non-Gaussianity only for numerical columns
+        for col in num_cols:
+            skew_val = stats.skew(df[col])
+            kurt_val = stats.kurtosis(df[col])
+            if abs(skew_val) < 0.5 and abs(kurt_val) < 1:
+                print(f"Warning: {col} appears Gaussian (skew={skew_val:.2f}, kurt={kurt_val:.2f})")
+    
+        return df
 
-  }
+    def infer_causal_direction(self, A, B, n_bootstrap=50):
+        """Improved causal inference with bootstrapping"""
+        try:
+            # Bootstrap stability check
+            a_to_b_vals = []
+            b_to_a_vals = []
+            
+            for _ in range(n_bootstrap):
+                sample_idx = np.random.choice(len(A), size=len(A), replace=True)
+                A_sample = A.iloc[sample_idx].values
+                B_sample = B.iloc[sample_idx].values
+                
+                model = DirectLiNGAM()
+                model.fit(np.column_stack((A_sample, B_sample)))
+                adj_matrix = model.adjacency_matrix_
+                
+                a_to_b_vals.append(abs(adj_matrix[1, 0]))
+                b_to_a_vals.append(abs(adj_matrix[0, 1]))
+                
+            # Calculate confidence intervals
+            a_to_b_mean = np.mean(a_to_b_vals)
+            b_to_a_mean = np.mean(b_to_a_vals)
+            a_to_b_std = np.std(a_to_b_vals)
+            b_to_a_std = np.std(b_to_a_vals)
+            
+            # Significance threshold (2 sigma)
+            if (a_to_b_mean - 2*a_to_b_std) > (b_to_a_mean + 2*b_to_a_std):
+                return 1, a_to_b_mean
+            elif (b_to_a_mean - 2*b_to_a_std) > (a_to_b_mean + 2*a_to_b_std):
+                return -1, b_to_a_mean
+            else:
+                return 0, max(a_to_b_mean, b_to_a_mean)
+                
+        except Exception as e:
+            print(f"LiNGAM failed on {A.name} vs {B.name}: {str(e)}")
+            return 0, 0
 
+    def build_causal_graph(self, df):
+      """Build causal graph with enhanced transitive reduction"""
+      df = self.preprocess_data(df)
+      numeric_cols = df.select_dtypes(include=[np.number]).columns
+    
+      # Clear existing graph
+      self.graph = nx.DiGraph()
+    
+      # Phase 1: Initial edge detection
+      for cola, colb in combinations(numeric_cols, 2):
+        if cola == colb:
+            continue
+        corr = df[cola].corr(df[colb])
+        if abs(corr) < 0.2:  # More stringent correlation threshold
+            continue
+            
+        direction, strength = self.infer_causal_direction(df[cola], df[colb])
+        
+        if direction == 1:
+            self.graph.add_edge(cola, colb, weight=strength, correlation=corr)
+        elif direction == -1:
+            self.graph.add_edge(colb, cola, weight=strength, correlation=corr)
 
-aboutCorrpy = """
-Corrpy is a Python library to automate correlation analysis across multiple features. It has the following methods:
+      # Phase 2: Network refinement
+      self._remove_weak_edges(threshold=0.1)
+      self._reduce_transitive_edges()
+    
+      return self.graph
 
-1. getTotalCorrRelation(df, features = ["Correlation", "Pearson", "Distance"], feature = "Correlation", short = False, prompt = None): Analyze correlation across all columns and get trends, interpretations and score with respect to feature u added in parameter. It returns a pandas DataFrame.
+    def _remove_weak_edges(self, threshold=0.1):
+        """Remove edges with low causal strength"""
+        to_remove = [(u, v) for u, v, d in self.graph.edges(data=True) 
+                    if d['weight'] < threshold]
+        self.graph.remove_edges_from(to_remove)
+        
+    def _reduce_transitive_edges(self):
+      """Improved transitive reduction using networkx algorithm"""
+      try:
+        import networkx as nx
+        if not nx.is_directed_acyclic_graph(self.graph):
+            # If graph is not a DAG, we need to make it one
+            # This is a simple approach - you might need more sophisticated cycle handling
+            self.graph = nx.DiGraph([(u, v) for u, v in self.graph.edges() if u != v])
+        self.graph = nx.algorithms.dag.transitive_reduction(self.graph)
+      except Exception as e:
+        print(f"Warning: Could not perform transitive reduction: {str(e)}")
+    
+    def plot_interactive_graph(self):
+        """Create interactive plot using Plotly"""
+        pos = nx.spring_layout(self.graph, seed=42)
+        
+        edge_x = []
+        edge_y = []
+        edge_text = []
+        for edge in self.graph.edges():
+            x0, y0 = pos[edge[0]]
+            x1, y1 = pos[edge[1]]
+            edge_x.extend([x0, x1, None])
+            edge_y.extend([y0, y1, None])
+            edge_text.append(
+                f"{edge[0]} → {edge[1]}<br>"
+                f"Strength: {self.graph.edges[edge]['weight']:.2f}<br>"
+                f"Correlation: {self.graph.edges[edge]['correlation']:.2f}"
+            )
 
-2. getGroupInf(objColumn, numColumn, df, prompt = None): Compute the correlation between the given object column and the given numeric column. It returns a pandas DataFrame.
+        node_x = [pos[k][0] for k in pos]
+        node_y = [pos[k][1] for k in pos]
+        node_text = list(pos.keys())
 
-3. getAllGroupInf(df, prompt = None): Compute the correlation between all object columns and all numeric columns. It returns a pandas DataFrame.
+        edge_trace = go.Scatter(
+            x=edge_x, y=edge_y,
+            line=dict(width=1.5, color='#888'),
+            hoverinfo='text',
+            text=edge_text,
+            mode='lines')
 
-4. setApi(): Securely handles your API token from Together.ai.
+        node_trace = go.Scatter(
+            x=node_x, y=node_y,
+            mode='markers+text',
+            text=node_text,
+            textposition="top center",
+            marker=dict(
+                showscale=True,
+                colorscale='YlGnBu',
+                size=25,
+                color=[],
+                line_width=2))
 
-5. explainAITC(df, feature="Correlation", character="Data analyst", mode="Confused", prompt = None): Get AI insights for correlation analysis. It returns a pandas DataFrame.
+        fig = go.Figure(data=[edge_trace, node_trace],
+                       layout=go.Layout(
+                           showlegend=False,
+                           hovermode='closest',
+                           margin=dict(b=20,l=5,r=5,t=40),
+                           xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                           yaxis=dict(showgrid=False, zeroline=False, showticklabels=False))
+                      )
+        
+        fig.show()
 
-6. shift(num1, num2, shiftValue, df): Test how your dependent variable reacts to small changes in an input variable. It returns a pandas DataFrame.
-
-7. explainShift(num1, num2, shiftValue, df, character = "Data analyst", mode = "Funny...", prompt = None): An AI analyst explains the output of shift() like you're in a meeting with your CEO. It returns a pandas DataFrame.
-
-8. checkTransit(firstFeature, secondFeature, ThirdFeature): Check for transitive correlation between three features. It returns a pandas DataFrame.
-
-9. explainPartialCorrelation(num1, num2, df, character = "Data analyst", mode = "Funny...", prompt = None): Get AI insights for partial correlation analysis. It returns a pandas DataFrame.
-
-10. checkTransitForColumn(column, df): Check for transitive correlation between a column and all other columns. It returns a pandas DataFrame.
-
-11. explainTransitForcolumn(column, df, character = "Data analyst", mode = "Funny...", prompt = None): An AI analyst explains the output of `checkTransitForColumn()` like you're in a meeting with your CEO. It returns a pandas DataFrame.
-
-Corrpy is a Python library that automates correlation analysis across multiple features. It provides simple methods to:
-
-* Get correlation scores between features
-* Get trends and interpretations of correlations
-* Get insights into correlation analysis
-* Test how a dependent variable reacts to small changes in an input variable
-* Check for transitive correlation between three features
-* Get insights into partial correlation analysis
-* Check for transitive correlation between a column and all other columns
-
-Corrpy is built on top of the Together AI library, which provides advanced AI-driven insights into correlation analysis. Corrpy is designed to be easy to use and integrate into existing data science workflows. The library is open source and community-driven, with the goal of making correlation analysis more accessible and understandable to a wider range of users.
-"""
-
-
+# Usage example
+df = pd.read_csv("corrpy/Titanic-Dataset.csv")
+analyzer = EnhancedCorrPy()
+G = analyzer.build_causal_graph(df)
+analyzer.plot_interactive_graph()
